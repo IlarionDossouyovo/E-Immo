@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appartement F3 meublé - 350K XOF/mois | E-Immo</title>
+<meta name="description" content="Villa moderne à vendre à Akpkodomè, Cotonou. 4 chambres, 3 salles de bain, 200m². Prix: 85 000 000 XOF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+:root { --marine: #050d1a; --navy2: #0a1628; --navy3: #0f1f3d; --cyan: #00d4ff; --or: #c9a84c; --violet: #7c4dff; --blanc: #f4f6fa; --gris: #8899bb; --card-bg: rgba(15,31,61,0.85); }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--marine); color: var(--blanc); font-family: 'DM Sans', sans-serif; }
+a { color: inherit; text-decoration: none; }
+
+/* Header */
+.property-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(5,13,26,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,212,255,0.08); }
+.header-inner { max-width: 1400px; margin: 0 auto; padding: 14px 6%; display: flex; align-items: center; justify-content: space-between; }
+.brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem; color: white; }
+.brand .e { color: var(--cyan); }
+.header-actions a { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; background: rgba(255,255,255,0.1); color: var(--gris); }
+.btn-back { color: var(--cyan); }
+
+/* Gallery */
+.gallery-section { padding: 100px 6% 0; }
+.gallery-main { aspect-ratio: 16/9; background: var(--navy3); border-radius: 16px; overflow: hidden; position: relative; cursor: pointer; }
+.gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-nav { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+.gallery-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; }
+.gallery-dot.active { background: white; }
+.gallery-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+.gallery-arrow:hover { background: rgba(0,0,0,0.8); }
+.gallery-arrow.prev { left: 20px; }
+.gallery-arrow.next { right: 20px; }
+
+.gallery-thumbs { display: flex; gap: 12px; margin-top: 16px; overflow-x: auto; padding-bottom: 12px; }
+.gallery-thumb { width: 100px; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; cursor: pointer; opacity: 0.6; transition: 0.2s; }
+.gallery-thumb.active, .gallery-thumb:hover { opacity: 1; }
+.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Content */
+.property-content { display: grid; grid-template-columns: 1fr 350px; gap: 40px; padding: 40px 6%; }
+.property-main h1 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; margin-bottom: 12px; }
+.property-location { color: var(--gris); font-size: 1.1rem; margin-bottom: 20px; }
+.property-price { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--or); margin-bottom: 24px; }
+
+.property-details-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+.detail-item { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px; text-align: center; }
+.detail-icon { font-size: 1.5rem; margin-bottom: 8px; }
+.detail-value { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+.detail-label { font-size: 0.8rem; color: var(--gris); text-transform: uppercase; }
+
+/* Description */
+.description { margin-bottom: 32px; }
+.description h2 { font-size: 1.3rem; margin-bottom: 16px; }
+.description p { color: var(--gris); line-height: 1.8; }
+
+/* Features */
+.features { margin-bottom: 32px; }
+.features h2 { font-size: 1.3rem; margin-bottom: 16px; }
+.features-list { display: flex; flex-wrap: wrap; gap: 12px; }
+.feature-tag { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2); border-radius: 25px; font-size: 0.9rem; }
+
+/* Sidebar - Contact */
+.property-sidebar { position: sticky; top: 100px; }
+.contact-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 28px; }
+.company-info-card { display: flex; align-items: center; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 20px; }
+.company-logo { width: 50px; height: 50px; border-radius: 10px; background: linear-gradient(135deg, var(--cyan), #007799); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; }
+.company-name { font-family: 'Syne', sans-serif; font-weight: 700; }
+.company-verified { font-size: 0.8rem; color: var(--cyan); }
+
+.contact-buttons { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 20px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, var(--cyan), var(--cyan)); color: var(--marine); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.3); }
+.btn-whatsapp { background: #25D366; color: white; }
+.btn-outline { border: 1px solid rgba(255,255,255,0.2); color: var(--blanc); }
+
+/* Payment Methods */
+.payment-section { padding: 24px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+.payment-section h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; }
+.payment-options { display: flex; flex-direction: column; gap: 10px; }
+.payment-option {
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; cursor: pointer; transition: all 0.2s;
+}
+.payment-option:hover { border-color: rgba(0,212,255,0.3); }
+.payment-option.selected { border-color: var(--cyan); background: rgba(0,212,255,0.1); }
+.payment-option .icon { font-size: 1.3rem; }
+.payment-option span { font-size: 0.9rem; }
+
+/* Map Placeholder */
+.map-section { margin-top: 32px; }
+.map-placeholder { aspect-ratio: 16/9; background: var(--navy3); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--gris); }
+
+/* Related */
+.related-section { padding: 60px 6%; background: var(--navy2); }
+.section-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; margin-bottom: 32px; }
+.related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .property-content { grid-template-columns: 1fr; }
+  .property-sidebar { position: static; }
+}
+@media (max-width: 600px) {
+  .property-details-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="property-header">
+  <div class="header-inner">
+    <a href="/index.html" class="brand"><span class="e">E</span>-Immo</a>
+    <div class="header-actions">
+      <a href="/listings.html" class="btn-back">← Retour aux annonces</a>
+    </div>
+  </div>
+</header>
+
+<!-- Gallery -->
+<section class="gallery-section">
+  <div class="gallery-main">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450'%3E%3Crect fill='%230a1628' width='800' height='450'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23667899' font-size='60'%3E🏠%3C/text%3E%3C/svg%3E" alt="Villa" id="mainImage">
+    <div class="gallery-arrow prev" onclick="prevImage()">‹</div>
+    <div class="gallery-arrow next" onclick="nextImage()">›</div>
+  </div>
+  <div class="gallery-thumbs">
+    <div class="gallery-thumb active" onclick="setImage(0)">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Crect fill='%230a1628' width='100' height='60'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23667899' font-size='20'%3E🏠%3C/text%3E%3C/svg%3E">
+    </div>
+    <div class="gallery-thumb" onclick="setImage(1)">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Crect fill='%230f1f3d' width='100' height='60'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23667899' font-size='20'%3E🛋️%3C/text%3E%3C/svg%3E">
+    </div>
+    <div class="gallery-thumb" onclick="setImage(2)">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Crect fill='%230f1f3d' width='100' height='60'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23667899' font-size='20'%3E🍳%3C/text%3E%3C/svg%3E">
+    </div>
+    <div class="gallery-thumb" onclick="setImage(3)">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Crect fill='%230f1f3d' width='100' height='60'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23667899' font-size='20'%3E🛁%3C/text%3E%3C/svg%3E">
+    </div>
+  </div>
+</section>
+
+<!-- Content -->
+<div class="property-content">
+  <div class="property-main">
+    <h1>Villa moderne à Akpkodomè</h1>
+    <p class="property-location">📍 Akpkodomè, Cotonou, Bénin</p>
+    <div class="property-price">85 000 000 XOF</div>
+    
+    <div class="property-details-grid">
+      <div class="detail-item">
+        <div class="detail-icon">🛏️</div>
+        <div class="detail-value">4</div>
+        <div class="detail-label">Chambres</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">🚿</div>
+        <div class="detail-value">3</div>
+        <div class="detail-label">Salles de bain</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">📐</div>
+        <div class="detail-value">200 m²</div>
+        <div class="detail-label">Surface</div>
+      </div>
+    </div>
+    
+    <div class="description">
+      <h2>Description</h2>
+      <p>
+        Magnifique villa moderne situated dans un quartier calme et résidentiel d'Akpkodomè. 
+        Cette propriété de prestige offre tout le confort nécessaire pour une vie familiale exceptionnelle.
+        Avec ses finitions de qualité et son architecture contemporaine, cette villa représente une opportunité rare 
+        sur le marché immobilier de Cotonou.
+      </p>
+    </div>
+    
+    <div class="features">
+      <h2>Équipements</h2>
+      <div class="features-list">
+        <span class="feature-tag">✅ Garage</span>
+        <span class="feature-tag">✅ Jardin</span>
+        <span class="feature-tag">✅ Terrasse</span>
+        <span class="feature-tag">✅ Climatisation</span>
+        <span class="feature-tag">✅ Cuisine équipée</span>
+        <span class="feature-tag">✅ Réservoir d'eau</span>
+        <span class="feature-tag">✅ Groupe électrogène</span>
+        <span class="feature-tag">✅ Sécurisé</span>
+      </div>
+    </div>
+    
+    <div class="map-section">
+      <h2>Localisation</h2>
+      <div class="map-placeholder">
+        <p>📍 Carte interactive - Akpkodomè, Cotonou</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sidebar -->
+  <aside class="property-sidebar">
+    <div class="contact-card">
+      <div class="company-info-card">
+        <div class="company-logo">E</div>
+        <div>
+          <div class="company-name">E-Immo ELECTRON</div>
+          <div class="company-verified">✓ Vérifié</div>
+        </div>
+      </div>
+      
+      <div class="contact-buttons">
+        <a href="mailto:electronbusiness07@gmail.com" class="btn btn-primary">✉️ Envoyer un message</a>
+        <a href="https://wa.me/22901977003" class="btn btn-whatsapp">💬 WhatsApp</a>
+        <a href="tel:+22901977003" class="btn btn-outline">📞 Appeler</a>
+      </div>
+      
+      <div class="payment-section">
+        <h3>Payer ce bien</h3>
+        <div class="payment-options">
+          <div class="payment-option" onclick="selectPayment(this, 'mobile')">
+            <span class="icon">📱</span>
+            <span>Mobile Money</span>
+          </div>
+          <div class="payment-option" onclick="selectPayment(this, 'bank')">
+            <span class="icon">🏦</span>
+            <span>Virement bancaire</span>
+          </div>
+          <div class="payment-option" onclick="selectPayment(this, 'card')">
+            <span class="icon">💳</span>
+            <span>Carte bancaire</span>
+          </div>
+          <div class="payment-option" onclick="selectPayment(this, 'cash')">
+            <span class="icon">💵</span>
+            <span>Espèces</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Related Properties -->
+<section class="related-section">
+  <h2 class="section-title">Propriétés similaires</h2>
+  <div class="related-grid">
+    <div class="property-card" style="background: var(--card-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden;">
+      <div style="aspect-ratio: 16/10; background: var(--navy3);"></div>
+      <div style="padding: 20px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 8px;">Maison familiale à Abomey</h3>
+        <p style="color: var(--gris); font-size: 0.85rem; margin-bottom: 12px;">📍 Abomey-Calavi</p>
+        <div style="font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--or);">95 000 000 XOF</div>
+      </div>
+    </div>
+    <div class="property-card" style="background: var(--card-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden;">
+      <div style="aspect-ratio: 16/10; background: var(--navy3);"></div>
+      <div style="padding: 20px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 8px;">Villa à Fidjrossè</h3>
+        <p style="color: var(--gris); font-size: 0.85rem; margin-bottom: 12px;">📍 Fidjrossè, Cotonou</p>
+        <div style="font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--or);">72 000 000 XOF</div>
+      </div>
+    </div>
+    <div class="property-card" style="background: var(--card-bg); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; overflow: hidden;">
+      <div style="aspect-ratio: 16/10); background: var(--navy3);"></div>
+      <div style="padding: 20px;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 8px;">Appartement F4</h3>
+        <p style="color: var(--gris); font-size: 0.85rem; margin-bottom: 12px;">📍 Centre, Cotonou</p>
+        <div style="font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--or);">58 000 000 XOF</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer style="padding: 32px 6%; background: var(--navy2); border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
+  <p style="color: var(--gris);">© 2025 E-Immo Platform. Tous droits réservés.</p>
+</footer>
+
+<script>
+let currentImage = 0;
+const images = [
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%230a1628" width="800" height="450"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23667899" font-size="60"%3E🏠%3C/text%3E%3C/svg%3E',
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%230f1f3d" width="800" height="450"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23667899" font-size="60"%3E🛋️%3Ctext%3E%3C/svg%3E',
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%230f1f3d" width="800" height="450"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23667899" font-size="60"%3E🍳%3Ctext%3E%3C/svg%3E',
+  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="800" height="450"%3E%3Crect fill="%230f1f3d" width="800" height="450"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23667899" font-size="60"%3E🛁%3Ctext%3E%3C/svg%3E'
+];
+
+function setImage(index) {
+  currentImage = index;
+  document.getElementById('mainImage').src = images[index];
+  document.querySelectorAll('.gallery-thumb').forEach((t, i) => {
+    t.classList.toggle('active', i === index);
+  });
+}
+
+function prevImage() {
+  setImage((currentImage - 1 + images.length) % images.length);
+}
+
+function nextImage() {
+  setImage((currentImage + 1) % images.length);
+}
+
+function selectPayment(el, method) {
+  document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  // Store selection
+  if (window.EImmo) {
+    window.EImmo.Utils.setData('selectedPayment', method);
+  }
+}
+</script>
+
+</body>
+</html>
