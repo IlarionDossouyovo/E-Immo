@@ -1,0 +1,10 @@
+# E-Immo Platform - Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://e-immo.com/sitemap.xml
+
+# Disallow admin
+Disallow: /dashboard
+Disallow: /admin

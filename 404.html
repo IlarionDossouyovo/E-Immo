@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 - Page non trouvée | E-Immo Platform</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --marine: #050d1a; --navy2: #0a1628; --cyan: #00d4ff; --blanc: #f4f6fa; --gris: #8899bb; }
+body {
+  background: var(--marine);
+  color: var(--blanc);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  background: 
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(0,212,255,0.08) 0%, transparent 60%),
+    var(--marine);
+}
+
+.error-code {
+  font-family: 'Syne', sans-serif;
+  font-size: 8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--cyan), #7c4dff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+
+p {
+  color: var(--gris);
+  font-size: 1.1rem;
+  max-width: 400px;
+  margin-bottom: 36px;
+}
+
+.buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #00a8cc, #00d4ff);
+  color: var(--marine);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,212,255,0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--blanc);
+}
+
+.nav-links {
+  margin-top: 60px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.nav-links a {
+  color: var(--gris);
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover {
+  color: var(--cyan);
+}
+</style>
+</head>
+<body>
+
+<div class="error-code">404</div>
+<h1>Page non trouvée</h1>
+<p>
+  Désolé, la page que vous recherchez n'existe pas ou a été déplacée. 
+  Retournez à l'accueil ou parcourir nos annonces.
+</p>
+
+<div class="buttons">
+  <a href="/" class="btn btn-primary">← Retour à l'accueil</a>
+  <a href="/listings.html" class="btn btn-secondary">Voir les annonces</a>
+</div>
+
+<nav class="nav-links">
+  <a href="/">Accueil</a>
+  <a href="/listings.html">Annonces</a>
+  <a href="/company/electron.html">ELECTRON</a>
+  <a href="/dashboard.html">Dashboard</a>
+</nav>
+
+</body>
+</html>
