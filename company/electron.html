@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Immo ELECTRON | Entreprise Immobilière</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="company.css">
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay active" id="loading">
+  <div class="spinner"></div>
+  <p>Chargement...</p>
+</div>
+
+<!-- Header -->
+<header class="company-header">
+  <div class="header-inner">
+    <a href="/index.html" class="brand">
+      <span class="e">E</span>-Immo <span style="font-size:0.7rem; color:var(--cyan);">ELECTRON</span>
+    </a>
+    <nav>
+      <a href="#services">Services</a>
+      <a href="#listings">Annonces</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a href="/index.html" class="btn btn-primary btn-sm">Retour</a>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="company-hero">
+  <div class="hero-bg"></div>
+  <div class="company-info">
+    <div class="company-logo-large">E</div>
+    <h1>E-Immo ELECTRON</h1>
+    <p class="verified-badge"><span>✓</span> Entreprise vérifiée</p>
+    <p class="company-desc">
+      Leader de l'immobilier premium au Benoît. Nous accompagnons nos clients dans tous leurs projets 
+      immobiliers : vente, location, gestion locative et investissement.
+    </p>
+    <div class="company-stats-hero">
+      <div class="stat"><strong>50+</strong><span>Annonces</span></div>
+      <div class="stat"><strong>200+</strong><span>Ventes</span></div>
+      <div class="stat"><strong>98%</strong><span>Satisfaction</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="company-services" id="services">
+  <div class="container">
+    <h2 class="section-title">Nos <em>Services</em></h2>
+    <div class="services-grid-company">
+      <div class="service-item reveal">
+        <div class="service-icon">🏠</div>
+        <h3>Vente</h3>
+        <p>Maisons, appartements, villas à Cotonou et Abomey-Calavi</p>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-icon">🏡</div>
+        <h3>Location</h3>
+        <p>Appartements meublés ou non, courts et longs termes</p>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-icon">🏢</div>
+        <h3>Bureaux</h3>
+        <p>Espaces professionnels et coworking</p>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-icon">🔑</div>
+        <h3>Gestion</h3>
+        <p>Gestion locative complète</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Listings -->
+<section class="company-listings" id="listings">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Nos <em>Annonces</em></h2>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">Tous</button>
+        <button class="filter-tab" data-filter="vente">Vente</button>
+        <button class="filter-tab" data-filter="location">Location</button>
+        <button class="filter-tab" data-filter="bureaux">Bureaux</button>
+      </div>
+    </div>
+    
+    <div class="listings-company-grid">
+      <div class="property-item reveal" data-type="vente">
+        <div class="property-img">
+          <span class="property-type-badge">Vente</span>
+        </div>
+        <div class="property-details">
+          <h3>Villa moderne à Akpkodomè</h3>
+          <p class="location">📍 Akpkodomè, Cotonou</p>
+          <div class="features"><span>4 ch.</span><span>3 sdb</span><span>200 m²</span></div>
+          <div class="price">85 000 000 XOF</div>
+        </div>
+      </div>
+      
+      <div class="property-item reveal" data-type="location">
+        <div class="property-img">
+          <span class="property-type-badge">Location</span>
+        </div>
+        <div class="property-details">
+          <h3>Appartement F3 meublé</h3>
+          <p class="location">📍 Fidjrossè, Cotonou</p>
+          <div class="features"><span>2 ch.</span><span>1 sdb</span><span>80 m²</span></div>
+          <div class="price">350 000 XOF/mois</div>
+        </div>
+      </div>
+      
+      <div class="property-item reveal" data-type="bureaux">
+        <div class="property-img">
+          <span class="property-type-badge">Bureaux</span>
+        </div>
+        <div class="property-details">
+          <h3>Bureau Premium</h3>
+          <p class="location">📍 Quartier金融, Cotonou</p>
+          <div class="features"><span>150 m²</span><span>Parking</span></div>
+          <div class="price">2 500 000 XOF/an</div>
+        </div>
+      </div>
+      
+      <div class="property-item reveal" data-type="vente">
+        <div class="property-img">
+          <span class="property-type-badge">Vente</span>
+        </div>
+        <div class="property-details">
+          <h3>Maison familiale à Abomey</h3>
+          <p class="location">📍 Abomey-Calavi</p>
+          <div class="features"><span>5 ch.</span><span>3 sdb</span><span>280 m²</span></div>
+          <div class="price">95 000 000 XOF</div>
+        </div>
+      </div>
+      
+      <div class="property-item reveal" data-type="location">
+        <div class="property-img">
+          <span class="property-type-badge">Location</span>
+        </div>
+        <div class="property-details">
+          <h3>Studio meublé centre-ville</h3>
+          <p class="location">📍 Centre, Cotonou</p>
+          <div class="features"><span>1 ch.</span><span>1 sdb</span><span>45 m²</span></div>
+          <div class="price">200 000 XOF/mois</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Payment & Contact -->
+<section class="payment-methods-section" id="contact">
+  <div class="container">
+    <h2 class="section-title">Moyens de <em>Paiement</em></h2>
+    <p class="section-subtitle">Choisissez votre méthode de paiement préférée</p>
+    
+    <div class="payment-methods-grid">
+      <div class="payment-method-card" onclick="selectPayment(this, 'mobile_money')">
+        <div class="icon">📱</div>
+        <h3>Mobile Money</h3>
+        <p>Moov, MTN, Coris</p>
+      </div>
+      <div class="payment-method-card" onclick="selectPayment(this, 'bank_transfer')">
+        <div class="icon">🏦</div>
+        <h3>Virement</h3>
+        <p>Banque Atlantique, Ecobank</p>
+      </div>
+      <div class="payment-method-card" onclick="selectPayment(this, 'visa')">
+        <div class="icon">💳</div>
+        <h3>Carte</h3>
+        <p>Visa, Mastercard</p>
+      </div>
+      <div class="payment-method-card" onclick="selectPayment(this, 'cash')">
+        <div class="icon">💵</div>
+        <h3>Espèces</h3>
+        <p>En bureau</p>
+      </div>
+    </div>
+    
+    <div class="contact-cards">
+      <a href="mailto:electronbusiness07@gmail.com" class="contact-card">
+        <span>✉️</span>
+        <div><strong>Email</strong><p>electronbusiness07@gmail.com</p></div>
+      </a>
+      <a href="https://wa.me/22901977003" class="contact-card">
+        <span>💬</span>
+        <div><strong>WhatsApp</strong><p>+229 01 977 003 47</p></div>
+      </a>
+      <a href="https://wa.me/22901498022" class="contact-card">
+        <span>📱</span>
+        <div><strong>WhatsApp 2</strong><p>+229 01 498 022 02</p></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p>© 2025 E-Immo ELECTRON. Tous droits réservés.</p>
+    <a href="/index.html">← Retour à E-Immo Platform</a>
+  </div>
+</footer>
+
+<script>
+// Initialize
+setTimeout(() => document.getElementById('loading').classList.remove('active'), 500);
+
+// Filter tabs
+document.querySelectorAll('.filter-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    
+    const filter = this.dataset.filter;
+    document.querySelectorAll('.property-item').forEach(item => {
+      if (filter === 'all' || item.dataset.type === filter) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+});
+
+// Payment selection
+function selectPayment(el, method) {
+  document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  window.EImmo?.Utils.setData('selectedPayment', method);
+}
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(e => e.forEach(el => { if(el.isIntersecting) el.classList.add('active'); }), {threshold:0.1});
+reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
