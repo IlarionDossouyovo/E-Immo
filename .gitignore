@@ -20,3 +20,5 @@ build/
 *~
 *.bak
 *.backup.html
+.vercel
+.env*.local
