@@ -124,6 +124,8 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
             self._get_notifications(query)
         elif path == '/api/charts':
             self._get_charts(query)
+        elif path == '/api/docs':
+            self._get_api_docs()
         elif path == '/api/health':
             self._send_json({'status': 'ok', 'timestamp': datetime.now().isoformat()})
         else:
@@ -478,6 +480,95 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
         conn.close()
         
         self._send_json(chart_data)
+    
+    # ==================== API DOCS ====================
+    
+    def _get_api_docs(self):
+        """Get API documentation"""
+        docs = {
+            'name': 'E-Immo API',
+            'version': '1.0.0',
+            'description': 'API REST pour la plateforme E-Immo Immobilier',
+            'endpoints': {
+                'GET /api/properties': {
+                    'description': 'Liste des propriétés avec filtres',
+                    'params': {
+                        'type': 'Type de propriété (apartment, villa, house, terrain, bureau)',
+                        'transaction_type': 'Type de transaction (vente, location)',
+                        'city': 'Ville',
+                        'min_price': 'Prix minimum',
+                        'max_price': 'Prix maximum',
+                        'bedrooms': 'Nombre de chambres minimum',
+                        'status': 'Statut (active, inactive)',
+                        'order_by': 'Ordre (price, created_at)',
+                        'order_dir': 'Direction (ASC, DESC)',
+                        'limit': 'Limite de résultats'
+                    }
+                },
+                'POST /api/properties': {
+                    'description': 'Créer une propriété',
+                    'body': {
+                        'title': 'Titre',
+                        'description': 'Description',
+                        'type': 'Type',
+                        'transaction_type': 'vente|location',
+                        'price': 'Prix',
+                        'surface': 'Surface',
+                        'city': 'Ville',
+                        'address': 'Adresse'
+                    }
+                },
+                'GET /api/companies': 'Liste des entreprises',
+                'POST /api/companies': 'Créer une entreprise',
+                'GET /api/users': 'Liste des utilisateurs',
+                'POST /api/users': 'Créer un utilisateur',
+                'GET /api/messages': 'Liste des messages',
+                'POST /api/messages': 'Envoyer un message',
+                'GET /api/favorites': {
+                    'description': 'Favoris d\'un utilisateur',
+                    'params': {'user_id': 'ID utilisateur'}
+                },
+                'POST /api/favorites': {
+                    'description': 'Ajouter/retirer un favori',
+                    'body': {
+                        'user_id': 'ID utilisateur',
+                        'property_id': 'ID propriété',
+                        'action': 'add|remove'
+                    }
+                },
+                'GET /api/analytics': 'Statistiques de la plateforme',
+                'GET /api/charts': 'Données pour graphiques',
+                'GET /api/notifications': 'Notifications admin',
+                'GET /api/health': 'Vérification santé API',
+                'POST /api/auth/login': {
+                    'description': 'Connexion utilisateur',
+                    'body': {'username': 'Nom utilisateur', 'password': 'Mot de passe'}
+                },
+                'POST /api/auth/register': {
+                    'description': 'Inscription utilisateur',
+                    'body': {'username': 'Nom', 'email': 'Email', 'password': 'Mot de passe'}
+                },
+                'POST /api/ai/chat': {
+                    'description': 'Chat avec l\'IA',
+                    'body': {'message': 'Message'}
+                },
+                'POST /api/ai/analyze': {
+                    'description': 'Analyse marché par l\'IA',
+                    'body': {'location': 'Localisation', 'property_type': 'Type'}
+                },
+                'POST /api/ai/estimate': {
+                    'description': 'Estimation de prix',
+                    'body': {'location': 'Lieu', 'type': 'Type', 'surface': 'Surface'}
+                },
+                'POST /api/automation/run': {
+                    'description': 'Exécuter une automation',
+                    'body': {'task': 'Nom de la tâche'}
+                },
+                'GET /api/automation/logs': 'Logs des automations'
+            }
+        }
+        
+        self._send_json(docs)
     
     def _call_ollama(self, prompt, system_prompt=None):
         """Call Ollama API"""
