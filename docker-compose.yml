@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Ollama AI Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: eimmo-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - eimmo-network
+
+  # E-Immo API (Backend)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: eimmo-api
+    ports:
+      - "3000:3000"
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - PORT=3000
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    networks:
+      - eimmo-network
+
+  # Database (SQLite for simplicity)
+  db:
+    image: alpine:latest
+    container_name: eimmo-db
+    volumes:
+      - ./data:/data
+    command: ["sh", "-c", "touch /data/eimmo.db && echo 'Database ready'"]
+    networks:
+      - eimmo-network
+
+volumes:
+  ollama-data:
+
+networks:
+  eimmo-network:
+    driver: bridge
