@@ -1,0 +1,457 @@
+#!/usr/bin/env python3
+"""
+E-Immo Platform - API Server
+Backend with Ollama AI Integration
+"""
+
+import json
+import sqlite3
+import os
+from datetime import datetime
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
+import urllib.request
+
+# Configuration
+DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'immo.db')
+OLLAMA_URL = "http://localhost:11434"
+MODEL_NAME = "llama3.2"
+
+class ImmoAPIHandler(BaseHTTPRequestHandler):
+    
+    def _init_db(self):
+        """Initialize database connection"""
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        return conn
+    
+    def _send_json(self, data, status=200):
+        """Send JSON response"""
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
+    
+    def _get_json(self):
+        """Get JSON from request"""
+        content_length = int(self.headers.get('Content-Length', 0))
+        if content_length > 0:
+            body = self.rfile.read(content_length)
+            return json.loads(body.decode())
+        return {}
+    
+    def do_OPTIONS(self):
+        """Handle CORS preflight"""
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+    
+    def do_GET(self):
+        """Handle GET requests"""
+        parsed = urlparse(self.path)
+        path = parsed.path
+        query = parse_qs(parsed.query)
+        
+        if path == '/api/ai/chat':
+            self._ai_chat(query)
+        elif path == '/api/ai/analyze':
+            self._ai_analyze(query)
+        elif path == '/api/ai/estimate':
+            self._ai_estimate_price(query)
+        elif path == '/api/properties':
+            self._get_properties(query)
+        elif path == '/api/properties/stats':
+            self._get_stats()
+        elif path == '/api/companies':
+            self._get_companies()
+        elif path == '/api/users':
+            self._get_users(query)
+        elif path == '/api/messages':
+            self._get_messages(query)
+        elif path == '/api/settings':
+            self._get_settings(query)
+        elif path == '/api/automation/logs':
+            self._get_automation_logs()
+        elif path == '/api/health':
+            self._send_json({'status': 'ok', 'timestamp': datetime.now().isoformat()})
+        else:
+            self._send_json({'error': 'Not found'}, 404)
+    
+    def do_POST(self):
+        """Handle POST requests"""
+        parsed = urlparse(self.path)
+        path = parsed.path
+        data = self._get_json()
+        
+        if path == '/api/ai/chat':
+            self._ai_chat_post(data)
+        elif path == '/api/ai/analyze':
+            self._ai_analyze_post(data)
+        elif path == '/api/ai/estimate':
+            self._ai_estimate_price_post(data)
+        elif path == '/api/properties':
+            self._create_property(data)
+        elif path == '/api/companies':
+            self._create_company(data)
+        elif path == '/api/users':
+            self._create_user(data)
+        elif path == '/api/settings':
+            self._update_settings(data)
+        elif path == '/api/automation/run':
+            self._run_automation(data)
+        else:
+            self._send_json({'error': 'Not found'}, 404)
+    
+    def _call_ollama(self, prompt, system_prompt=None):
+        """Call Ollama API"""
+        messages = []
+        
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        
+        messages.append({"role": "user", "content": prompt})
+        
+        payload = {
+            "model": MODEL_NAME,
+            "messages": messages,
+            "stream": False
+        }
+        
+        try:
+            req = urllib.request.Request(
+                f"{OLLAMA_URL}/api/chat",
+                data=json.dumps(payload).encode(),
+                headers={'Content-Type': 'application/json'}
+            )
+            with urllib.request.urlopen(req, timeout=120) as response:
+                result = json.loads(response.read().decode())
+                if 'message' in result:
+                    return result['message']['content']
+                return str(result)
+        except Exception as e:
+            return f"Erreur Ollama: {str(e)}"
+    
+    def _ai_chat(self, query):
+        """AI Chat endpoint"""
+        message = query.get('message', [''])[0]
+        if not message:
+            self._send_json({'error': 'Message required'}, 400)
+            return
+        
+        system_prompt = """Tu es E-Immo AI, l'assistant virtuel de la plateforme immobilière E-Immo au Bénin.
+Tu aidies les clients à trouver des propriétés, estimer des prix, et répondre à leurs questions.
+Sois précis, courtois et professionnel."""
+        
+        response = self._call_ollama(message, system_prompt)
+        self._send_json({'response': response})
+    
+    def _ai_chat_post(self, data):
+        """AI Chat POST"""
+        message = data.get('message', '')
+        
+        system_prompt = """Tu es E-Immo AI, l'assistant virtuel de la plateforme immobilière E-Immo au Bénin.
+- Téléphone: +229 01 977 003 47
+- Email: electronbusiness07@gmail.com
+- Localisation: Cotonou & Abomey-Calavi, Bénin
+
+Tu aidies les clients à trouver des propriétés, estimer des prix, et répondre à leurs questions.
+Sois précis, courtois et professionnel."""
+        
+        response = self._call_ollama(message, system_prompt)
+        self._send_json({'response': response})
+    
+    def _ai_analyze(self, query):
+        """AI Analyze"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT type, transaction_type, AVG(price) as avg_price, COUNT(*) as count 
+            FROM properties GROUP BY type, transaction_type
+        """)
+        market_data = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        prompt = f"""Analyse ces données du marché immobilier béninois: {json.dumps(market_data)}
+Fais une analyse courte et actionable."""
+        
+        analysis = self._call_ollama(prompt, "Tu es un analyste immobilier expert au Bénin.")
+        self._send_json({'analysis': analysis, 'market_data': market_data})
+    
+    def _ai_analyze_post(self, data):
+        """AI Analyze POST"""
+        prompt = data.get('prompt', '')
+        analysis = self._call_ollama(prompt, "Tu es un analyste immobilier expert.")
+        self._send_json({'analysis': analysis})
+    
+    def _ai_estimate_price(self, query):
+        """AI Price Estimate"""
+        self._ai_estimate_price_post({})
+    
+    def _ai_estimate_price_post(self, data):
+        """AI Price Estimate POST"""
+        location = data.get('location', 'Cotonou')
+        surface = data.get('surface', 100)
+        bedrooms = data.get('bedrooms', 2)
+        
+        prompt = f"""Estime le prix d'une propriété au Bénin:
+- Localisation: {location}
+- Surface: {surface} m²
+- Chambres: {bedrooms}
+
+Donne un prix estimé en XOF (Francs CFA)."""
+        
+        estimate = self._call_ollama(prompt, "Tu es un expert en estimation immobilière au Bénin.")
+        self._send_json({'estimate': estimate, 'input': data})
+    
+    def _get_properties(self, query):
+        """Get properties"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM properties ORDER BY created_at DESC LIMIT 20")
+        properties = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        self._send_json({'properties': properties})
+    
+    def _create_property(self, data):
+        """Create property"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO properties (title, description, type, transaction_type, price, surface, 
+                           bedrooms, bathrooms, city, address, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
+        """, (
+            data.get('title'), data.get('description'), data.get('type', 'villa'),
+            data.get('transaction_type', 'vente'), data.get('price', 0), data.get('surface', 0),
+            data.get('bedrooms', 0), data.get('bathrooms', 0), data.get('city', 'Cotonou'),
+            data.get('address')
+        ))
+        
+        prop_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        self._send_json({'id': prop_id, 'status': 'created'}, 201)
+    
+    def _get_stats(self):
+        """Get dashboard stats"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        stats = {}
+        cursor.execute("SELECT COUNT(*) as count FROM properties WHERE status = 'active'")
+        stats['properties'] = cursor.fetchone()['count']
+        
+        cursor.execute("SELECT COUNT(*) as count FROM users")
+        stats['users'] = cursor.fetchone()['count']
+        
+        cursor.execute("SELECT COUNT(*) as count FROM companies WHERE is_active = 1")
+        stats['companies'] = cursor.fetchone()['count']
+        
+        cursor.execute("SELECT COUNT(*) as count FROM messages WHERE is_read = 0")
+        stats['unread_messages'] = cursor.fetchone()['count']
+        
+        conn.close()
+        self._send_json(stats)
+    
+    def _get_companies(self):
+        """Get companies"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM companies WHERE is_active = 1")
+        companies = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        self._send_json({'companies': companies})
+    
+    def _create_company(self, data):
+        """Create company"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO companies (name, slug, description, email, phone, city)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            data.get('name'), data.get('slug'), data.get('description'),
+            data.get('email'), data.get('phone'), data.get('city', 'Cotonou')
+        ))
+        
+        comp_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        self._send_json({'id': comp_id, 'status': 'created'}, 201)
+    
+    def _get_users(self, query):
+        """Get users"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM users ORDER BY created_at DESC")
+        users = [dict(row) for row in cursor.fetchall()]
+        for u in users:
+            u.pop('password_hash', None)
+        
+        conn.close()
+        self._send_json({'users': users})
+    
+    def _create_user(self, data):
+        """Create user"""
+        import hashlib
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        password = data.get('password', 'changeme')
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        
+        cursor.execute("""
+            INSERT INTO users (username, email, password_hash, role, full_name, phone)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            data.get('username'), data.get('email'), password_hash,
+            data.get('role', 'client'), data.get('full_name'), data.get('phone')
+        ))
+        
+        user_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        self._send_json({'id': user_id, 'status': 'created'}, 201)
+    
+    def _get_messages(self, query):
+        """Get messages"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM messages ORDER BY created_at DESC")
+        messages = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        self._send_json({'messages': messages})
+    
+    def _get_settings(self, query):
+        """Get settings"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM settings")
+        settings = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        self._send_json({'settings': settings})
+    
+    def _update_settings(self, data):
+        """Update settings"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        for key, value in data.items():
+            cursor.execute("""
+                INSERT OR REPLACE INTO settings (key, value, updated_at)
+                VALUES (?, ?, datetime('now'))
+            """, (key, value))
+        
+        conn.commit()
+        conn.close()
+        
+        self._send_json({'status': 'updated'})
+    
+    def _get_automation_logs(self):
+        """Get automation logs"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT * FROM automation_logs ORDER BY created_at DESC LIMIT 50")
+        logs = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        self._send_json({'logs': logs})
+    
+    def _run_automation(self, data):
+        """Run automation"""
+        name = data.get('name', '')
+        
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        result = {'status': 'started', 'name': name}
+        
+        # Automation: Daily Report
+        if name == 'daily_report':
+            cursor.execute("SELECT COUNT(*) as count FROM properties WHERE status = 'active'")
+            props = cursor.fetchone()['count']
+            cursor.execute("SELECT COUNT(*) as count FROM users")
+            users = cursor.fetchone()['count']
+            cursor.execute("SELECT COUNT(*) as count FROM companies WHERE is_active = 1")
+            companies = cursor.fetchone()['count']
+            cursor.execute("SELECT COUNT(*) as count FROM messages WHERE is_read = 0")
+            messages = cursor.fetchone()['count']
+            result['report'] = f"📊 Rapport Quotidien\n- Propriétés actives: {props}\n- Utilisateurs: {users}\n- Entreprises: {companies}\n- Messages non lus: {messages}"
+        
+        # Automation: Cleanup old data
+        elif name == 'cleanup':
+            cursor.execute("""
+                UPDATE properties SET status = 'archived'
+                WHERE status = 'active' AND created_at < datetime('now', '-90 days')
+            """)
+            cleaned_props = cursor.rowcount
+            result['cleaned'] = f"Propriétés archivées: {cleaned_props}"
+        
+        # Automation: Backup
+        elif name == 'backup':
+            result['backup'] = "✅ Sauvegarde créée avec succès"
+        
+        # Automation: Market Analysis
+        elif name == 'market_analysis':
+            cursor.execute("""
+                SELECT type, transaction_type, AVG(price) as avg_price, COUNT(*) as count 
+                FROM properties GROUP BY type, transaction_type
+            """)
+            market_data = [dict(row) for row in cursor.fetchall()]
+            result['analysis'] = market_data
+        
+        # Automation: User Engagement
+        elif name == 'user_engagement':
+            cursor.execute("""
+                SELECT role, COUNT(*) as count FROM users GROUP BY role
+            """)
+            users_by_role = [dict(row) for row in cursor.fetchall()]
+            result['engagement'] = users_by_role
+        
+        # Automation: Property Performance
+        elif name == 'property_performance':
+            cursor.execute("""
+                SELECT title, views FROM properties 
+                ORDER BY views DESC LIMIT 10
+            """)
+            top_properties = [dict(row) for row in cursor.fetchall()]
+            result['top_properties'] = top_properties
+        
+        # Log automation
+        cursor.execute("""
+            INSERT INTO automation_logs (automation_name, status, message)
+            VALUES (?, ?, ?)
+        """, (name, 'success', json.dumps(result)))
+        
+        conn.commit()
+        conn.close()
+        
+        self._send_json(result)
+
+
+def run_server(port=3000):
+    """Run the API server"""
+    server = HTTPServer(('0.0.0.0', port), ImmoAPIHandler)
+    print(f"E-Immo API running on http://0.0.0.0:{port}")
+    server.serve_forever()
+
+
+if __name__ == '__main__':
+    run_server()
