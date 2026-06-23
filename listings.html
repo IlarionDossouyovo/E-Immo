@@ -216,13 +216,10 @@ footer p { color: var(--gris); font-size: 0.9rem; }
   </div>
   
   <!-- Pagination -->
-  <div class="pagination">
-    <button>←</button>
-    <button class="active">1</button>
-    <button>2</button>
-    <button>3</button>
-    <button>4</button>
-    <button>→</button>
+  <div class="pagination" id="pagination">
+    <button onclick="changePage(-1)" id="prevBtn">←</button>
+    <span id="pageNumbers"></span>
+    <button onclick="changePage(1)" id="nextBtn">→</button>
   </div>
 </section>
 
@@ -232,22 +229,53 @@ footer p { color: var(--gris); font-size: 0.9rem; }
 </footer>
 
 <script>
+// Properties data
+const properties = Array.from(document.querySelectorAll('.property-card'));
+const itemsPerPage = 6;
+let currentPage = 1;
+let currentFilter = 'all';
+
+function showPage(page) {
+  const filtered = currentFilter === 'all' 
+    ? properties 
+    : properties.filter(p => p.dataset.type === currentFilter);
+  
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  if (page < 1) page = 1;
+  if (page > totalPages) page = totalPages;
+  currentPage = page;
+  
+  // Hide all, show current page
+  properties.forEach(p => p.style.display = 'none');
+  const start = (page - 1) * itemsPerPage;
+  const pageItems = filtered.slice(start, start + itemsPerPage);
+  pageItems.forEach(p => p.style.display = 'block');
+  
+  // Update pagination UI
+  document.getElementById('pageNumbers').innerHTML = 
+    `<button class="active">${page}</button>` + 
+    (totalPages > 1 ? `<button onclick="showPage(${page + 1})">${page + 1}</button>` : '');
+  
+  document.getElementById('prevBtn').disabled = page <= 1;
+  document.getElementById('nextBtn').disabled = page >= totalPages;
+}
+
+function changePage(delta) {
+  showPage(currentPage + delta);
+}
+
 // Filter buttons
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     this.classList.add('active');
-    
-    const filter = this.dataset.filter;
-    document.querySelectorAll('.property-card').forEach(card => {
-      if (filter === 'all' || card.dataset.type === filter) {
-        card.style.display = 'block';
-      } else {
-        card.style.display = 'none';
-      }
-    });
+    currentFilter = this.dataset.filter;
+    showPage(1);
   });
 });
+
+// Init
+showPage(1);
 </script>
 
 </body>
