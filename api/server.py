@@ -120,6 +120,8 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
             self._get_favorites(query)
         elif path == '/api/analytics':
             self._get_analytics(query)
+        elif path == '/api/notifications':
+            self._get_notifications(query)
         elif path == '/api/health':
             self._send_json({'status': 'ok', 'timestamp': datetime.now().isoformat()})
         else:
@@ -353,6 +355,44 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
             'companies': companies,
             'recent_logs': logs
         })
+    
+    # ==================== NOTIFICATIONS ====================
+    
+    def _get_notifications(self, query):
+        """Get admin notifications"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        notifications = []
+        
+        # Unread messages
+        cursor.execute("""
+            SELECT id, subject, body, created_at, 'message' as type
+            FROM messages 
+            WHERE is_read = 0
+            ORDER BY created_at DESC LIMIT 5
+        """)
+        for row in cursor.fetchall():
+            notifications.append({
+                'type': 'message',
+                'title': row['subject'],
+                'body': row['body'][:100] + '...' if len(row['body']) > 100 else row['body'],
+                'time': row['created_at']
+            })
+        
+        # Low stock properties (if any)
+        cursor.execute("SELECT COUNT(*) FROM properties WHERE status = 'active'")
+        if cursor.fetchone()[0] < 3:
+            notifications.append({
+                'type': 'warning',
+                'title': 'Propriétés en faible quantité',
+                'body': 'Il ne reste que quelques propriétés actives',
+                'time': datetime.now().isoformat()
+            })
+        
+        conn.close()
+        
+        self._send_json({'notifications': notifications})
     
     def _call_ollama(self, prompt, system_prompt=None):
         """Call Ollama API"""
