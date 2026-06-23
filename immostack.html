@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immo Stack - AI Management Console</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #0f3460;
+            --accent: #e94560;
+            --dark: #0a0a0a;
+            --light: #f5f5f5;
+            --success: #00c853;
+            --warning: #ffd600;
+            --error: #ff1744;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--dark);
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+        }
+        
+        .login-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 400px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(233,69,96,0.3);
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        .dashboard.active {
+            display: flex;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(0,0,0,0.5);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo {
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo h2 {
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 24px;
+        }
+        
+        .logo span {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .nav-menu {
+            flex: 1;
+        }
+        
+        .nav-item {
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #aaa;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(233,69,96,0.1);
+            color: #fff;
+        }
+        
+        .nav-item.active {
+            border-left: 3px solid var(--accent);
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .status-badge {
+            padding: 8px 16px;
+            background: rgba(0,200,83,0.1);
+            border-radius: 20px;
+            color: var(--success);
+            font-size: 14px;
+        }
+        
+        /* Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        
+        .stat-card .label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .stat-card .value.accent {
+            color: var(--accent);
+        }
+        
+        /* AI Agents Panel */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .agent-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        
+        .agent-card h3 {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .agent-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .agent-avatar.chatbot {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .agent-avatar.analyst {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+        
+        .agent-avatar.estimator {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+        
+        .agent-avatar.automation {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+        }
+        
+        .agent-avatar.marketing {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+        }
+        
+        .agent-avatar.support {
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+        }
+        
+        .agent-avatar.security {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+        }
+        
+        .agent-avatar.analytics {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .agent-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-left: auto;
+        }
+        
+        .agent-status.active {
+            background: rgba(0,200,83,0.1);
+            color: var(--success);
+        }
+        
+        .agent-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        
+        .agent-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn-sm {
+            padding: 10px 16px;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        /* Chat Interface */
+        .chat-container {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .chat-message {
+            margin-bottom: 16px;
+            max-width: 80%;
+        }
+        
+        .chat-message.user {
+            margin-left: auto;
+        }
+        
+        .chat-message .bubble {
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+        }
+        
+        .chat-message.user .bubble {
+            background: var(--accent);
+            border-bottom-right-radius: 4px;
+        }
+        
+        .chat-message.bot .bubble {
+            background: rgba(255,255,255,0.1);
+            border-bottom-left-radius: 4px;
+        }
+        
+        .chat-input-area {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            gap: 12px;
+        }
+        
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #fff;
+        }
+        
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        /* Automation Panel */
+        .automation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .automation-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .automation-card h4 {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .automation-card p {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        
+        .schedule-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .data-table th {
+            color: #666;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .data-table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        
+        .status-cell {
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        
+        .status-cell.active {
+            background: rgba(0,200,83,0.1);
+            color: var(--success);
+        }
+        
+        .status-cell.pending {
+            background: rgba(255,214,0,0.1);
+            color: var(--warning);
+        }
+        
+        /* Settings */
+        .settings-section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .settings-section h3 {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+        
+        .setting-row label {
+            color: #aaa;
+        }
+        
+        .toggle {
+            width: 50px;
+            height: 26px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 13px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .toggle.active {
+            background: var(--accent);
+        }
+        
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+        }
+        
+        .toggle.active::after {
+            left: 26px;
+        }
+        
+        /* Logs */
+        .logs-container {
+            background: #0a0a0a;
+            border-radius: 12px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', monospace;
+            font-size: 13px;
+        }
+        
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            gap: 16px;
+        }
+        
+        .log-time {
+            color: #666;
+            min-width: 80px;
+        }
+        
+        .log-status {
+            min-width: 60px;
+        }
+        
+        .log-status.success { color: var(--success); }
+        .log-status.error { color: var(--error); }
+        
+        /* Sections */
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .action-btn {
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-btn:hover {
+            background: rgba(233,69,96,0.1);
+            border-color: var(--accent);
+        }
+        
+        /* Loading */
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        
+        .loading.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .agents-grid { grid-template-columns: 1fr; }
+            .automation-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .automation-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <h2>🏠 Immo Stack</h2>
+            <p style="color: #666; text-align: center; margin-bottom: 30px;">AI Management Console</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Nom d'utilisateur</label>
+                    <input type="text" id="username" placeholder="admin" required>
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Connexion</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h2>Immo Stack</h2>
+                <span>AI Management Console</span>
+            </div>
+            
+            <div class="nav-menu">
+                <div class="nav-item active" data-section="overview">
+                    <span class="nav-icon">📊</span>
+                    <span>Aperçu</span>
+                </div>
+                <div class="nav-item" data-section="ai-agents">
+                    <span class="nav-icon">🤖</span>
+                    <span>IA & Agents</span>
+                </div>
+                <div class="nav-item" data-section="chat">
+                    <span class="nav-icon">💬</span>
+                    <span>Chatbot</span>
+                </div>
+                <div class="nav-item" data-section="automation">
+                    <span class="nav-icon">⚡</span>
+                    <span>Automation</span>
+                </div>
+                <div class="nav-item" data-section="properties">
+                    <span class="nav-icon">🏠</span>
+                    <span>Propriétés</span>
+                </div>
+                <div class="nav-item" data-section="analytics">
+                    <span class="nav-icon">📈</span>
+                    <span>Analytics</span>
+                </div>
+                <div class="nav-item" data-section="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Paramètres</span>
+                </div>
+                <div class="nav-item" data-section="logs">
+                    <span class="nav-icon">📋</span>
+                    <span>Logs</span>
+                </div>
+            </div>
+            
+            <div class="nav-item" onclick="logout()">
+                <span class="nav-icon">🚪</span>
+                <span>Déconnexion</span>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Overview Section -->
+            <div class="section active" id="section-overview">
+                <div class="header">
+                    <h1>Tableau de bord</h1>
+                    <div class="header-actions">
+                        <span class="status-badge">● Ollama Connecté</span>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="label">Propriétés actives</div>
+                        <div class="value" id="statProperties">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Utilisateurs</div>
+                        <div class="value" id="statUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Entreprises</div>
+                        <div class="value" id="statCompanies">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Messages non lus</div>
+                        <div class="value accent" id="statMessages">0</div>
+                    </div>
+                </div>
+                
+                <h2 style="margin-bottom: 20px;">Agents IA Actifs</h2>
+                <div class="agents-grid">
+                    <div class="agent-card">
+                        <h3>
+                            <div class="agent-avatar chatbot">💬</div>
+                            <span>E-Immo Chatbot</span>
+                            <span class="agent-status active">Actif</span>
+                        </h3>
+                        <p class="agent-description">Assistant virtuel pour les clients - répond aux questions et guide vers les propriétés.</p>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="testAgent('chatbot')">Tester</button>
+                            <button class="btn btn-sm btn-primary" onclick="navigateTo('chat')">Ouvrir</button>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <h3>
+                            <div class="agent-avatar analyst">📊</div>
+                            <span>Market Analyst</span>
+                            <span class="agent-status active">Actif</span>
+                        </h3>
+                        <p class="agent-description">Analyse les tendances du marché immobilier et génère des rapports.</p>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="runAnalysis()">Analyser</button>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <h3>
+                            <div class="agent-avatar estimator">🏷️</div>
+                            <span>Price Estimator</span>
+                            <span class="agent-status active">Actif</span>
+                        </h3>
+                        <p class="agent-description">Estime le prix des propriétés basé sur l'IA et les données du marché.</p>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="testAgent('estimator')">Estimer</button>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <h3>
+                            <div class="agent-avatar automation">⚡</div>
+                            <span>Automation Engine</span>
+                            <span class="agent-status active">Actif</span>
+                        </h3>
+                        <p class="agent-description">Gère les tâches automatisées: rapports, nettoyages, sauvegardes.</p>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="runAutomation('daily_report')">Exécuter</button>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <h3>
+                            <div class="agent-avatar marketing">📣</div>
+                            <span>Marketing AI</span>
+                            <span class="agent-status active">Actif</span>
+                        </h3>
+                        <p class="agent-description">Génère du contenu marketing, descriptions de propriétés et campagnes publicitaires.</p>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="testAgent('marketing')">Générer</button>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <h3>
+                            <div class="agent-avatar support">🎧</div>
+                            <span>Customer Support</span>
+                            <span class="agent-status active">Actif</span>
+                        </h3>
+                        <p class="agent-description">Gère les demandes de support client et le suivi après-vente.</p>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="testAgent('support')">Tester</button>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <h3>
+                            <div class="agent-avatar security">🔐</div>
+                            <span>Security Monitor</span>
+                            <span class="agent-status active">Actif</span>
+                        </h3>
+                        <p class="agent-description">Surveille la sécurité du site et détecte les activités suspectes.</p>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="testAgent('security')">Vérifier</button>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <h3>
+                            <div class="agent-avatar analytics">📈</div>
+                            <span>Data Analyst</span>
+                            <span class="agent-status active">Actif</span>
+                        </h3>
+                        <p class="agent-description">Analyse les données de la plateforme et génère des insights actionnables.</p>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="runAutomation('market_analysis')">Analyser</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 style="margin-bottom: 20px;">Propriétés récentes</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Titre</th>
+                            <th>Type</th>
+                            <th>Prix</th>
+                            <th>Ville</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody id="propertiesTable">
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- AI Agents Section -->
+            <div class="section" id="section-ai-agents">
+                <div class="header">
+                    <h1>IA & Agents</h1>
+                </div>
+                
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="testAgent('chatbot')">
+                        <span>💬</span> Test Chatbot
+                    </button>
+                    <button class="action-btn" onclick="runAnalysis()">
+                        <span>📊</span> Analyse Marché
+                    </button>
+                    <button class="action-btn" onclick="testAgent('estimator')">
+                        <span>🏷️</span> Estimer Prix
+                    </button>
+                </div>
+                
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h3>E-Immo AI - Test</h3>
+                        <span class="status-badge">● Connecté</span>
+                    </div>
+                    <div class="chat-messages" id="aiChatMessages">
+                        <div class="chat-message bot">
+                            <div class="bubble">Bienvenue dans la console de test IA. Comment puis-je vous aider?</div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="aiChatInput" placeholder="Tapez votre message..." onkeypress="if(event.key==='Enter')sendAIMessage()">
+                        <button class="btn btn-primary" onclick="sendAIMessage()">Envoyer</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Section -->
+            <div class="section" id="section-chat">
+                <div class="header">
+                    <h1>Chatbot E-Immo</h1>
+                </div>
+                
+                <div class="chat-container" style="height: 600px;">
+                    <div class="chat-header">
+                        <h3>💬 Assistant Immobilier</h3>
+                        <span class="status-badge">● En ligne</span>
+                    </div>
+                    <div class="chat-messages" id="chatbotMessages">
+                        <div class="chat-message bot">
+                            <div class="bubble">Bonjour! Je suis E-Immo AI, votre assistant immobilier. Comment puis-je vous aider aujourd'hui?</div>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="mainChatInput" placeholder="Tapez votre message..." onkeypress="if(event.key==='Enter')sendMainChat()">
+                        <button class="btn btn-primary" onclick="sendMainChat()">Envoyer</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Automation Section -->
+            <div class="section" id="section-automation">
+                <div class="header">
+                    <h1>Automation</h1>
+                </div>
+                
+                <div class="automation-grid">
+                    <div class="automation-card">
+                        <h4>📊 Rapport Quotidien</h4>
+                        <p>Génère un rapport quotidien de l'activité</p>
+                        <span class="schedule-badge">🕘 09:00</span>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-primary" onclick="runAutomation('daily_report')">Exécuter</button>
+                        </div>
+                    </div>
+                    
+                    <div class="automation-card">
+                        <h4>🧹 Nettoyage Données</h4>
+                        <p>Archive les propriétés anciennes</p>
+                        <span class="schedule-badge">🌙 02:00</span>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-primary" onclick="runAutomation('cleanup')">Exécuter</button>
+                        </div>
+                    </div>
+                    
+                    <div class="automation-card">
+                        <h4>💾 Sauvegarde</h4>
+                        <p>Sauvegarde la base de données</p>
+                        <span class="schedule-badge">📅 Journalier</span>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-primary" onclick="runAutomation('backup')">Exécuter</button>
+                        </div>
+                    </div>
+                    
+                    <div class="automation-card">
+                        <h4>📈 Analyse Marché</h4>
+                        <p>Analyse les tendances du marché</p>
+                        <span class="schedule-badge">📅 Hebdomadaire</span>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-primary" onclick="runAutomation('market_analysis')">Exécuter</button>
+                        </div>
+                    </div>
+                    
+                    <div class="automation-card">
+                        <h4>👥 Engagement Utilisateurs</h4>
+                        <p>Statistiques d'engagement</p>
+                        <span class="schedule-badge">📅 Hebdomadaire</span>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-primary" onclick="runAutomation('user_engagement')">Exécuter</button>
+                        </div>
+                    </div>
+                    
+                    <div class="automation-card">
+                        <h4>🏠 Performance Biens</h4>
+                        <p>Classement des propriétés par vues</p>
+                        <span class="schedule-badge">📅 Journalier</span>
+                        <div class="agent-actions">
+                            <button class="btn btn-sm btn-primary" onclick="runAutomation('property_performance')">Exécuter</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 style="margin-bottom: 20px;">Logs d'Automation</h2>
+                <div class="logs-container" id="automationLogs">
+                    <div class="log-entry">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-status success">En attente</span>
+                        <span>Aucun log pour le moment</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Properties Section -->
+            <div class="section" id="section-properties">
+                <div class="header">
+                    <h1>Propriétés</h1>
+                    <button class="btn btn-primary" onclick="addProperty()">+ Ajouter</button>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Titre</th>
+                            <th>Type</th>
+                            <th>Transaction</th>
+                            <th>Prix</th>
+                            <th>Ville</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allPropertiesTable">
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Analytics Section -->
+            <div class="section" id="section-analytics">
+                <div class="header">
+                    <h1>Analytics</h1>
+                    <button class="btn btn-primary" onclick="runAnalysis()">Analyser</button>
+                </div>
+                
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h3>📊 Analyse du Marché</h3>
+                    </div>
+                    <div class="chat-messages" id="analysisMessages">
+                        <div class="chat-message bot">
+                            <div class="bubble">Cliquez sur "Analyser" pour générer un rapport du marché immobilier.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Section -->
+            <div class="section" id="section-settings">
+                <div class="header">
+                    <h1>Paramètres</h1>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>🤖 Intelligence Artificielle</h3>
+                    <div class="setting-row">
+                        <label>Chatbot IA</label>
+                        <div class="toggle active" onclick="toggleSetting(this)"></div>
+                    </div>
+                    <div class="setting-row">
+                        <label>Estimation de prix</label>
+                        <div class="toggle active" onclick="toggleSetting(this)"></div>
+                    </div>
+                    <div class="setting-row">
+                        <label>Analyse du marché</label>
+                        <div class="toggle active" onclick="toggleSetting(this)"></div>
+                    </div>
+                    <div class="setting-row">
+                        <label>Recommendations</label>
+                        <div class="toggle active" onclick="toggleSetting(this)"></div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>⚡ Automation</h3>
+                    <div class="setting-row">
+                        <label>Rapports automatiques</label>
+                        <div class="toggle active" onclick="toggleSetting(this)"></div>
+                    </div>
+                    <div class="setting-row">
+                        <label>Sauvegarde automatique</label>
+                        <div class="toggle active" onclick="toggleSetting(this)"></div>
+                    </div>
+                    <div class="setting-row">
+                        <label>Nettoyage automatique</label>
+                        <div class="toggle" onclick="toggleSetting(this)"></div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>🔗 Connexions</h3>
+                    <div class="setting-row">
+                        <label>API Ollama</label>
+                        <span style="color: var(--success);">● Connecté</span>
+                    </div>
+                    <div class="setting-row">
+                        <label>Modèle</label>
+                        <span>llama3.2</span>
+                    </div>
+                    <div class="setting-row">
+                        <label>Base de données</label>
+                        <span style="color: var(--success);">● SQLite</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Logs Section -->
+            <div class="section" id="section-logs">
+                <div class="header">
+                    <h1>Logs Système</h1>
+                    <button class="btn btn-secondary" onclick="loadLogs()">↻ Actualiser</button>
+                </div>
+                
+                <div class="logs-container" id="systemLogs">
+                    <div class="log-entry">
+                        <span class="log-time">--:--:--</span>
+                        <span class="log-status">Info</span>
+                        <span>Chargement des logs...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:3000';
+        let isLoggedIn = false;
+        
+        // Check login on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedAuth = localStorage.getItem('immo_auth');
+            if (savedAuth) {
+                showDashboard();
+            }
+        });
+        
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple auth check - in production use proper authentication
+            if (username === 'admin' || username === 'electron') {
+                localStorage.setItem('immo_auth', btoa(username + ':' + password));
+                showDashboard();
+            } else {
+                alert('Identifiants incorrects');
+            }
+        });
+        
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            loadStats();
+            loadProperties();
+            loadAutomationLogs();
+        }
+        
+        function logout() {
+            localStorage.removeItem('immo_auth');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').classList.remove('active');
+        }
+        
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.dataset.section;
+                if (section) {
+                    navigateTo(section);
+                }
+            });
+        });
+        
+        function navigateTo(section) {
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.section === section) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Update sections
+            document.querySelectorAll('.section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            document.getElementById('section-' + section).classList.add('active');
+        }
+        
+        // API Calls
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' }
+                };
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                const response = await fetch(API_URL + endpoint, options);
+                return await response.json();
+            } catch (e) {
+                console.error('API Error:', e);
+                return { error: e.message };
+            }
+        }
+        
+        // Load Stats
+        async function loadStats() {
+            try {
+                const stats = await apiCall('/api/properties/stats');
+                document.getElementById('statProperties').textContent = stats.properties || 0;
+                document.getElementById('statUsers').textContent = stats.users || 0;
+                document.getElementById('statCompanies').textContent = stats.companies || 0;
+                document.getElementById('statMessages').textContent = stats.unread_messages || 0;
+            } catch (e) {
+                console.log('API non disponible, mode démo');
+            }
+        }
+        
+        // Load Properties
+        async function loadProperties() {
+            try {
+                const data = await apiCall('/api/properties');
+                const properties = data.properties || [];
+                
+                // Overview table
+                const tableBody = document.getElementById('propertiesTable');
+                tableBody.innerHTML = properties.slice(0, 5).map(p => `
+                    <tr>
+                        <td>${p.title}</td>
+                        <td>${p.type}</td>
+                        <td>${formatPrice(p.price)}</td>
+                        <td>${p.city}</td>
+                        <td><span class="status-cell active">${p.status}</span></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="5">Aucune propriété</td></tr>';
+                
+                // All properties table
+                const allTable = document.getElementById('allPropertiesTable');
+                allTable.innerHTML = properties.map(p => `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td>${p.title}</td>
+                        <td>${p.type}</td>
+                        <td>${p.transaction_type}</td>
+                        <td>${formatPrice(p.price)}</td>
+                        <td>${p.city}</td>
+                        <td><span class="status-cell ${p.status === 'active' ? 'active' : 'pending'}">${p.status}</span></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="7">Aucune propriété</td></tr>';
+            } catch (e) {
+                console.log('API non disponible');
+            }
+        }
+        
+        // AI Chat
+        async function sendAIMessage() {
+            const input = document.getElementById('aiChatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addMessage('aiChatMessages', message, 'user');
+            input.value = '';
+            
+            // Show loading
+            addMessage('aiChatMessages', '⏳ Analyse en cours...', 'bot');
+            
+            try {
+                const response = await apiCall('/api/ai/chat', 'POST', { message: message });
+                const messages = document.getElementById('aiChatMessages');
+                messages.removeChild(messages.lastChild);
+                addMessage('aiChatMessages', response.response || response.error, 'bot');
+            } catch (e) {
+                const messages = document.getElementById('aiChatMessages');
+                messages.removeChild(messages.lastChild);
+                addMessage('aiChatMessages', 'Erreur de connexion à l\'IA', 'bot');
+            }
+        }
+        
+        async function sendMainChat() {
+            const input = document.getElementById('mainChatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addMessage('chatbotMessages', message, 'user');
+            input.value = '';
+            
+            try {
+                const response = await apiCall('/api/ai/chat', 'POST', { message: message });
+                addMessage('chatbotMessages', response.response || 'Réponse IA', 'bot');
+            } catch (e) {
+                addMessage('chatbotMessages', 'Service IA temporairement indisponible', 'bot');
+            }
+        }
+        
+        function addMessage(containerId, text, sender) {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = 'chat-message ' + sender;
+            div.innerHTML = '<div class="bubble">' + text + '</div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // Analysis
+        async function runAnalysis() {
+            const container = document.getElementById('analysisMessages');
+            container.innerHTML = '';
+            addMessage('analysisMessages', '📊 Analyse du marché en cours...', 'bot');
+            
+            try {
+                const response = await apiCall('/api/ai/analyze', 'POST', { type: 'market' });
+                const messages = document.getElementById('analysisMessages');
+                messages.innerHTML = '';
+                addMessage('analysisMessages', response.analysis || 'Analyse terminée', 'bot');
+            } catch (e) {
+                addMessage('analysisMessages', 'Erreur d\'analyse', 'bot');
+            }
+        }
+        
+        // Automation
+        async function runAutomation(name) {
+            try {
+                const response = await apiCall('/api/automation/run', 'POST', { name: name });
+                addLog(name, 'success', response.report || 'Terminé');
+                alert('Automation exécutée: ' + name);
+            } catch (e) {
+                addLog(name, 'error', e.message);
+            }
+        }
+        
+        async function loadAutomationLogs() {
+            try {
+                const data = await apiCall('/api/automation/logs');
+                const logs = data.logs || [];
+                const container = document.getElementById('automationLogs');
+                container.innerHTML = logs.slice(0, 10).map(log => `
+                    <div class="log-entry">
+                        <span class="log-time">${log.created_at?.slice(11, 19) || '--:--:--'}</span>
+                        <span class="log-status ${log.status}">${log.status}</span>
+                        <span>${log.automation_name}</span>
+                    </div>
+                `).join('') || '<div class="log-entry"><span>Aucun log</span></div>';
+            } catch (e) {
+                console.log('API non disponible');
+            }
+        }
+        
+        function addLog(name, status, message) {
+            const container = document.getElementById('automationLogs');
+            const time = new Date().toISOString().slice(11, 19);
+            container.innerHTML = `
+                <div class="log-entry">
+                    <span class="log-time">${time}</span>
+                    <span class="log-status ${status}">${status}</span>
+                    <span>${name}: ${message}</span>
+                </div>
+            ` + container.innerHTML;
+        }
+        
+        // Test Agents
+        function testAgent(agent) {
+            navigateTo('ai-agents');
+            if (agent === 'chatbot') {
+                document.getElementById('aiChatInput').focus();
+            } else if (agent === 'estimator') {
+                document.getElementById('aiChatInput').value = 'Estimez le prix d\'une villa de 200m² à Cotonou avec 4 chambres';
+                sendAIMessage();
+            }
+        }
+        
+        // Add Property
+        async function addProperty() {
+            const title = prompt('Titre de la propriété:');
+            if (!title) return;
+            
+            const property = {
+                title: title,
+                type: 'villa',
+                transaction_type: 'vente',
+                price: parseInt(prompt('Prix (XOF):') || '0'),
+                surface: parseInt(prompt('Surface (m²):') || '0'),
+                bedrooms: parseInt(prompt('Chambres:') || '0'),
+                bathrooms: parseInt(prompt('Salles de bain:') || '0'),
+                city: prompt('Ville:') || 'Cotonou',
+                address: prompt('Adresse:') || ''
+            };
+            
+            await apiCall('/api/properties', 'POST', property);
+            loadProperties();
+            alert('Propriété créée!');
+        }
+        
+        // Toggle Settings
+        function toggleSetting(el) {
+            el.classList.toggle('active');
+        }
+        
+        // Helpers
+        function formatPrice(amount) {
+            return new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: 'XOF',
+                maximumFractionDigits: 0
+            }).format(amount || 0);
+        }
+    </script>
+</body>
+</html>
