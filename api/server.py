@@ -122,6 +122,8 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
             self._get_analytics(query)
         elif path == '/api/notifications':
             self._get_notifications(query)
+        elif path == '/api/charts':
+            self._get_charts(query)
         elif path == '/api/health':
             self._send_json({'status': 'ok', 'timestamp': datetime.now().isoformat()})
         else:
@@ -393,6 +395,89 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
         conn.close()
         
         self._send_json({'notifications': notifications})
+    
+    # ==================== CHARTS DATA ====================
+    
+    def _get_charts(self, query):
+        """Get chart data for analytics"""
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        chart_data = {}
+        
+        # Properties by type
+        cursor.execute("""
+            SELECT type, COUNT(*) as count 
+            FROM properties 
+            GROUP BY type
+        """)
+        rows = cursor.fetchall()
+        chart_data['properties_by_type'] = {
+            'labels': [r['type'] for r in rows],
+            'data': [r['count'] for r in rows]
+        }
+        
+        # Properties by city
+        cursor.execute("""
+            SELECT city, COUNT(*) as count 
+            FROM properties 
+            GROUP BY city
+        """)
+        rows = cursor.fetchall()
+        chart_data['properties_by_city'] = {
+            'labels': [r['city'] for r in rows],
+            'data': [r['count'] for r in rows]
+        }
+        
+        # Properties by transaction type
+        cursor.execute("""
+            SELECT transaction_type, COUNT(*) as count 
+            FROM properties 
+            GROUP BY transaction_type
+        """)
+        rows = cursor.fetchall()
+        chart_data['transaction_types'] = {
+            'labels': [r['transaction_type'] for r in rows],
+            'data': [r['count'] for r in rows]
+        }
+        
+        # Price distribution
+        cursor.execute("""
+            SELECT 
+                CASE 
+                    WHEN price < 10000000 THEN '0-10M'
+                    WHEN price < 25000000 THEN '10-25M'
+                    WHEN price < 50000000 THEN '25-50M'
+                    WHEN price < 100000000 THEN '50-100M'
+                    ELSE '100M+'
+                END as range,
+                COUNT(*) as count
+            FROM properties
+            GROUP BY range
+        """)
+        rows = cursor.fetchall()
+        chart_data['price_distribution'] = {
+            'labels': [r['range'] for r in rows],
+            'data': [r['count'] for r in rows]
+        }
+        
+        # Monthly trends (last 6 months)
+        cursor.execute("""
+            SELECT strftime('%Y-%m', created_at) as month, COUNT(*) as count
+            FROM properties
+            WHERE created_at >= date('now', '-6 months')
+            GROUP BY month
+            ORDER BY month
+        """)
+        rows = cursor.fetchall()
+        chart_data['monthly_trends'] = {
+            'labels': [r['month'] for r in rows],
+            'data': [r['count'] for r in rows]
+        }
+        
+        conn.close()
+        
+        self._send_json(chart_data)
     
     def _call_ollama(self, prompt, system_prompt=None):
         """Call Ollama API"""
