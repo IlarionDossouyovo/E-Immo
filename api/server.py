@@ -116,6 +116,10 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
             self._get_settings(query)
         elif path == '/api/automation/logs':
             self._get_automation_logs()
+        elif path == '/api/favorites':
+            self._get_favorites(query)
+        elif path == '/api/analytics':
+            self._get_analytics(query)
         elif path == '/api/health':
             self._send_json({'status': 'ok', 'timestamp': datetime.now().isoformat()})
         else:
@@ -149,6 +153,8 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
             self._update_settings(data)
         elif path == '/api/automation/run':
             self._run_automation(data)
+        elif path == '/api/favorites':
+            self._manage_favorites(data)
         else:
             self._send_json({'error': 'Not found'}, 404)
     
@@ -254,6 +260,99 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
         """Logout user"""
         # JWT tokens are stateless - client just discards the token
         self._send_json({'message': 'Déconnexion réussie'})
+    
+    # ==================== FAVORITES ====================
+    
+    def _get_favorites(self, query):
+        """Get user favorites"""
+        user_id = query.get('user_id', [None])[0]
+        
+        if not user_id:
+            self._send_json({'error': 'user_id requis'}, 400)
+            return
+        
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT f.*, p.title, p.price, p.city, p.address, p.type, p.transaction_type
+            FROM favorites f
+            JOIN properties p ON f.property_id = p.id
+            WHERE f.user_id = ?
+            ORDER BY f.created_at DESC
+        """, (int(user_id),))
+        
+        favorites = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        
+        self._send_json({'favorites': favorites})
+    
+    def _manage_favorites(self, data):
+        """Add or remove favorite"""
+        user_id = data.get('user_id')
+        property_id = data.get('property_id')
+        action = data.get('action', 'add')  # add or remove
+        
+        if not user_id or not property_id:
+            self._send_json({'error': 'user_id et property_id requis'}, 400)
+            return
+        
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        if action == 'remove':
+            cursor.execute("DELETE FROM favorites WHERE user_id = ? AND property_id = ?", (user_id, property_id))
+            conn.commit()
+            conn.close()
+            self._send_json({'message': 'Favori supprimé'})
+        else:
+            try:
+                cursor.execute("INSERT OR IGNORE INTO favorites (user_id, property_id) VALUES (?, ?)", (user_id, property_id))
+                conn.commit()
+                conn.close()
+                self._send_json({'message': 'Favori ajouté'}, 201)
+            except Exception as e:
+                conn.close()
+                self._send_json({'error': str(e)}, 400)
+    
+    # ==================== ANALYTICS ====================
+    
+    def _get_analytics(self, query):
+        """Get platform analytics"""
+        days = int(query.get('days', [30])[0])
+        
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        # Properties stats
+        cursor.execute("SELECT COUNT(*) as total, AVG(price) as avg_price FROM properties WHERE status = 'active'")
+        props = cursor.fetchone()
+        
+        # Messages stats
+        cursor.execute("SELECT COUNT(*) FROM messages WHERE is_read = 0")
+        unread = cursor.fetchone()[0]
+        
+        # Companies stats
+        cursor.execute("SELECT COUNT(*) FROM companies WHERE is_active = 1")
+        companies = cursor.fetchone()[0]
+        
+        # Recent activity
+        cursor.execute("""
+            SELECT automation_name, status, created_at 
+            FROM automation_logs 
+            ORDER BY created_at DESC LIMIT 10
+        """)
+        logs = [dict(row) for row in cursor.fetchall()]
+        
+        conn.close()
+        
+        self._send_json({
+            'properties': props['total'],
+            'avg_price': props['avg_price'] or 0,
+            'unread_messages': unread,
+            'companies': companies,
+            'recent_logs': logs
+        })
     
     def _call_ollama(self, prompt, system_prompt=None):
         """Call Ollama API"""
