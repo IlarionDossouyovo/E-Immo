@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contactez E-Immo Platform - ELECTRON pour vos projets immobiliers au Bénin">
+  <title>Contact | E-Immo Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root { --marine: #050d1a; --navy2: #0a1628; --cyan: #00d4ff; --or: #c9a84c; --violet: #7c4dff; --blanc: #f4f6fa; --gris: #8899bb; --card-bg: rgba(15,31,61,0.85); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--marine); color: var(--blanc); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Header */
+    .header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(5,13,26,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,212,255,0.08); }
+    .header-inner { max-width: 1400px; margin: 0 auto; padding: 14px 6%; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: white; }
+    .brand .e { color: var(--cyan); }
+    .header nav { display: flex; gap: 24px; }
+    .header nav a { color: var(--gris); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .header nav a:hover { color: var(--cyan); }
+    .header .btn { padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; }
+    .btn-primary { background: linear-gradient(135deg, #00a8cc, #00d4ff); color: var(--marine); }
+    .btn-secondary { border: 1px solid rgba(255,255,255,0.2); color: var(--blanc); }
+
+    /* Hero */
+    .hero { padding: 120px 6% 40px; text-align: center; background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(0,212,255,0.08) 0%, transparent 60%), var(--marine); }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 16px; }
+    .hero p { color: var(--gris); max-width: 500px; margin: 0 auto; }
+
+    /* Contact Section */
+    .contact-section { padding: 40px 6% 80px; max-width: 1200px; margin: 0 auto; }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; }
+    
+    @media (max-width: 768px) {
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Contact Info */
+    .contact-info { padding: 40px; background: var(--card-bg); border-radius: 16px; border: 1px solid rgba(0,212,255,0.1); }
+    .contact-info h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 24px; color: var(--cyan); }
+    .contact-item { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+    .contact-icon { width: 48px; height: 48px; background: rgba(0,212,255,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    .contact-item h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+    .contact-item p { color: var(--gris); font-size: 0.9rem; }
+    .contact-item a { color: var(--cyan); transition: opacity 0.2s; }
+    .contact-item a:hover { opacity: 0.8; }
+
+    /* Contact Form */
+    .contact-form { padding: 40px; background: var(--card-bg); border-radius: 16px; border: 1px solid rgba(0,212,255,0.1); }
+    .contact-form h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 24px; color: var(--cyan); }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--gris); }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 14px 16px; background: var(--navy2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--blanc); font-size: 1rem; font-family: inherit; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--cyan); }
+    .form-group textarea { min-height: 150px; resize: vertical; }
+    .form-submit { width: 100%; padding: 16px; background: linear-gradient(135deg, #00a8cc, #00d4ff); color: var(--marine); border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .form-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,212,255,0.3); }
+    .form-success { display: none; padding: 16px; background: rgba(0,212,255,0.1); border-radius: 8px; color: var(--cyan); text-align: center; margin-top: 16px; }
+
+    /* Footer */
+    .footer { padding: 40px 6%; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: var(--gris); font-size: 0.85rem; }
+    .footer a { color: var(--cyan); }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="brand"><span class="e">E</span>-Immo</a>
+      <nav>
+        <a href="index.html">Accueil</a>
+        <a href="listings.html">Annonces</a>
+        <a href="company/electron.html">Entreprise</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <a href="dashboard.html" class="btn btn-primary">Espace Pro</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Contactez-nous</h1>
+    <p>Une question ? Besoin d'aide ? Notre équipe est disponible pour vous accompagner dans vos projets immobiliers.</p>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-section">
+    <div class="contact-grid">
+      <!-- Contact Info -->
+      <div class="contact-info">
+        <h2>Informations de contact</h2>
+        
+        <div class="contact-item">
+          <div class="contact-icon">📧</div>
+          <div>
+            <h3>Email</h3>
+            <p><a href="mailto:electronbusiness07@gmail.com">electronbusiness07@gmail.com</a></p>
+          </div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-icon">📱</div>
+          <div>
+            <h3>WhatsApp 1</h3>
+            <p><a href="https://wa.me/2290197700347">+229 01 977 003 47</a></p>
+          </div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-icon">📱</div>
+          <div>
+            <h3>WhatsApp 2</h3>
+            <p><a href="https://wa.me/2290149802202">+229 01 498 022 02</a></p>
+          </div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div>
+            <h3>Localisation</h3>
+            <p>Cotonou & Abomey-Calavi, République du Bénin</p>
+          </div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-icon">🕐</div>
+          <div>
+            <h3>Horaires</h3>
+            <p>Lundi - Samedi: 8h - 18h<br>Dimanche: Sur RDV</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="contact-form">
+        <h2>Envoyez-nous un message</h2>
+        <form id="contactForm">
+          <div class="form-group">
+            <label for="name">Nom complet *</label>
+            <input type="text" id="name" name="name" required placeholder="Votre nom">
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required placeholder="votre@email.com">
+          </div>
+          
+          <div class="form-group">
+            <label for="phone">Téléphone</label>
+            <input type="tel" id="phone" name="phone" placeholder="+229 XX XXX XXX">
+          </div>
+          
+          <div class="form-group">
+            <label for="subject">Sujet *</label>
+            <select id="subject" name="subject" required>
+              <option value="">Sélectionnez un sujet</option>
+              <option value="achat">Achat de propriété</option>
+              <option value="location">Location</option>
+              <option value="vente">Vendre un bien</option>
+              <option value="estimation">Estimation gratuite</option>
+              <option value="autre">Autre question</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="message">Message *</label>
+            <textarea id="message" name="message" required placeholder="Décrivez votre projet ou posez votre question..."></textarea>
+          </div>
+          
+          <button type="submit" class="form-submit">Envoyer le message</button>
+          
+          <div class="form-success" id="formSuccess">
+            ✅ Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 E-Immo Platform by ELECTRON. Tous droits réservés.</p>
+  </footer>
+
+  <script>
+    // Contact Form Handling
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get form data
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData);
+      
+      // Store in localStorage (demo)
+      const messages = JSON.parse(localStorage.getItem('eimmo_messages') || '[]');
+      messages.push({
+        ...data,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('eimmo_messages', JSON.stringify(messages));
+      
+      // Show success message
+      document.getElementById('formSuccess').style.display = 'block';
+      this.reset();
+      
+      // Hide success after 5 seconds
+      setTimeout(() => {
+        document.getElementById('formSuccess').style.display = 'none';
+      }, 5000);
+    });
+  </script>
+</body>
+</html>

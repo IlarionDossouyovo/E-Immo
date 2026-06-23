@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Vos biens favoris - E-Immo Platform">
+  <title>Mes Favoris | E-Immo Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root { --marine: #050d1a; --navy2: #0a1628; --cyan: #00d4ff; --or: #c9a84c; --violet: #7c4dff; --blanc: #f4f6fa; --gris: #8899bb; --card-bg: rgba(15,31,61,0.85); }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--marine); color: var(--blanc); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Header */
+    .header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(5,13,26,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,212,255,0.08); }
+    .header-inner { max-width: 1400px; margin: 0 auto; padding: 14px 6%; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: white; }
+    .brand .e { color: var(--cyan); }
+    .header nav { display: flex; gap: 24px; }
+    .header nav a { color: var(--gris); font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .header nav a:hover { color: var(--cyan); }
+    .header .btn { padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; }
+    .btn-primary { background: linear-gradient(135deg, #00a8cc, #00d4ff); color: var(--marine); }
+    .btn-secondary { border: 1px solid rgba(255,255,255,0.2); color: var(--blanc); }
+
+    /* Hero */
+    .hero { padding: 120px 6% 40px; text-align: center; background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(0,212,255,0.08) 0%, transparent 60%), var(--marine); }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 16px; }
+    .hero p { color: var(--gris); max-width: 500px; margin: 0 auto; }
+
+    /* Favorites Section */
+    .favorites-section { padding: 40px 6% 80px; max-width: 1400px; margin: 0 auto; }
+
+    /* Filter Bar */
+    .filter-bar { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .filter-bar .count { color: var(--gris); font-size: 0.9rem; }
+    .filter-bar .count strong { color: var(--cyan); }
+    .filter-actions { display: flex; gap: 12px; }
+    .filter-btn { padding: 8px 16px; background: var(--navy2); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--blanc); font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .filter-btn.active { background: var(--cyan); color: var(--marine); border-color: var(--cyan); }
+
+    /* Properties Grid */
+    .properties-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+
+    /* Property Card */
+    .property-card { background: var(--card-bg); border-radius: 16px; overflow: hidden; border: 1px solid rgba(0,212,255,0.1); transition: transform 0.3s, box-shadow 0.3s; }
+    .property-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,212,255,0.15); }
+    .property-image { position: relative; height: 200px; background: var(--navy2); overflow: hidden; }
+    .property-image img { width: 100%; height: 100%; object-fit: cover; }
+    .property-badge { position: absolute; top: 12px; left: 12px; padding: 6px 12px; background: var(--cyan); color: var(--marine); font-size: 0.75rem; font-weight: 700; border-radius: 4px; text-transform: uppercase; }
+    .property-badge.vip { background: var(--or); }
+    .property-favorite { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; transition: transform 0.2s; }
+    .property-favorite:hover { transform: scale(1.1); }
+    .property-favorite.active { color: #ff4757; }
+    .property-content { padding: 20px; }
+    .property-type { font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
+    .property-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; }
+    .property-location { color: var(--gris); font-size: 0.85rem; margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+    .property-features { display: flex; gap: 16px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .property-feature { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--gris); }
+    .property-price { font-size: 1.3rem; font-weight: 700; color: var(--or); }
+    .property-price span { font-size: 0.85rem; color: var(--gris); font-weight: 400; }
+    .property-actions { display: flex; gap: 12px; margin-top: 16px; }
+    .property-actions .btn { flex: 1; padding: 12px; text-align: center; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+    .btn-view { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--blanc); }
+    .btn-view:hover { border-color: var(--cyan); color: var(--cyan); }
+    .btn-contact { background: linear-gradient(135deg, #00a8cc, #00d4ff); color: var(--marine); }
+    .btn-contact:hover { box-shadow: 0 4px 16px rgba(0,212,255,0.3); }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 80px 20px; }
+    .empty-icon { font-size: 4rem; margin-bottom: 24px; }
+    .empty-state h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 16px; }
+    .empty-state p { color: var(--gris); margin-bottom: 24px; }
+    .empty-state .btn { display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #00a8cc, #00d4ff); color: var(--marine); border-radius: 8px; font-weight: 700; }
+
+    /* Footer */
+    .footer { padding: 40px 6%; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: var(--gris); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="brand"><span class="e">E</span>-Immo</a>
+      <nav>
+        <a href="index.html">Accueil</a>
+        <a href="listings.html">Annonces</a>
+        <a href="company/electron.html">Entreprise</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <a href="dashboard.html" class="btn btn-primary">Espace Pro</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Mes Favoris</h1>
+    <p> Consultez vos biens préférés sauvegardés. </p>
+  </section>
+
+  <!-- Favorites Section -->
+  <section class="favorites-section">
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <span class="count">Vous avez <strong id="favoritesCount">0</strong> favori(s)</span>
+      <div class="filter-actions">
+        <button class="filter-btn active" data-sort="recent">Plus récents</button>
+        <button class="filter-btn" data-sort="price-asc">Prix ↑</button>
+        <button class="filter-btn" data-sort="price-desc">Prix ↓</button>
+        <button class="filter-btn" id="clearAllFavorites">Tout supprimer</button>
+      </div>
+    </div>
+
+    <!-- Properties Grid -->
+    <div class="properties-grid" id="propertiesGrid">
+      <!-- Properties will be rendered here -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <div class="empty-icon">❤️</div>
+      <h2>Aucun favori pour le moment</h2>
+      <p>Parcourez nos annonces et ajoutez vos biens préférés!</p>
+      <a href="listings.html" class="btn">Voir les annonces</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2025 E-Immo Platform by ELECTRON. Tous droits réservés.</p>
+  </footer>
+
+  <script>
+    // Demo Properties Data
+    const demoProperties = [
+      {
+        id: 'demo-1',
+        title: 'Villa Moderne avec Piscine',
+        type: 'vente',
+        location: 'Cotonou, Rue de la Marina',
+        price: 45000000,
+        bedrooms: 4,
+        bathrooms: 3,
+        surface: 250,
+        image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800',
+        company: 'ELECTRON'
+      },
+      {
+        id: 'demo-2',
+        title: 'Appartement F3 Meublé',
+        type: 'location',
+        location: 'Abomey-Calavi, Akassato',
+        price: 150000,
+        bedrooms: 2,
+        bathrooms: 1,
+        surface: 80,
+        image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
+        company: 'ELECTRON'
+      },
+      {
+        id: 'demo-3',
+        title: 'Bureau de Standing',
+        type: 'bureaux',
+        location: 'Cotonou, Centre des Affaires',
+        price: 85000000,
+        bedrooms: 0,
+        bathrooms: 2,
+        surface: 450,
+        image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800',
+        company: 'ELECTRON'
+      }
+    ];
+
+    // Load favorites from localStorage
+    function loadFavorites() {
+      return JSON.parse(localStorage.getItem('eimmo_favorites') || '[]');
+    }
+
+    // Save favorites to localStorage
+    function saveFavorites(favorites) {
+      localStorage.setItem('eimmo_favorites', JSON.stringify(favorites));
+    }
+
+    // Render favorites
+    function renderFavorites() {
+      const favorites = loadFavorites();
+      const grid = document.getElementById('propertiesGrid');
+      const emptyState = document.getElementById('emptyState');
+      const countEl = document.getElementById('favoritesCount');
+
+      countEl.textContent = favorites.length;
+
+      if (favorites.length === 0) {
+        grid.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      grid.style.display = 'grid';
+      emptyState.style.display = 'none';
+
+      // Filter demo properties by favorites
+      const properties = demoProperties.filter(p => favorites.includes(p.id));
+
+      grid.innerHTML = properties.map(property => `
+        <div class="property-card" data-id="${property.id}">
+          <div class="property-image">
+            <img src="${property.image}" alt="${property.title}" onerror="this.style.background='var(--navy2)'">
+            <span class="property-badge ${property.type === 'vente' ? '' : 'vip'}">${property.type}</span>
+            <div class="property-favorite active" onclick="toggleFavorite('${property.id}')">❤️</div>
+          </div>
+          <div class="property-content">
+            <div class="property-type">${property.type}</div>
+            <h3 class="property-title">${property.title}</h3>
+            <p class="property-location">📍 ${property.location}</p>
+            <div class="property-features">
+              <span class="property-feature">🛏️ ${property.bedrooms} ch.</span>
+              <span class="property-feature">🚿 ${property.bathrooms} sdb</span>
+              <span class="property-feature">📐 ${property.surface} m²</span>
+            </div>
+            <div class="property-price">
+              ${property.type === 'location' ? property.price.toLocaleString() + ' XOF/mois' : property.price.toLocaleString() + ' XOF'}
+            </div>
+            <div class="property-actions">
+              <a href="property/detail.html?id=${property.id}" class="btn btn-view">Voir</a>
+              <a href="contact.html" class="btn btn-contact">Contacter</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Toggle favorite
+    function toggleFavorite(propertyId) {
+      let favorites = loadFavorites();
+      const index = favorites.indexOf(propertyId);
+      
+      if (index > -1) {
+        favorites.splice(index, 1);
+      } else {
+        favorites.push(propertyId);
+      }
+      
+      saveFavorites(favorites);
+      renderFavorites();
+    }
+
+    // Clear all favorites
+    document.getElementById('clearAllFavorites').addEventListener('click', function() {
+      if (confirm('Êtes-vous sûr de vouloir supprimer tous vos favoris?')) {
+        saveFavorites([]);
+        renderFavorites();
+      }
+    });
+
+    // Sort buttons
+    document.querySelectorAll('.filter-btn[data-sort]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn[data-sort]').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        // Sort logic can be added here
+      });
+    });
+
+    // Initialize
+    renderFavorites();
+  </script>
+</body>
+</html>
