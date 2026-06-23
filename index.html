@@ -1098,26 +1098,170 @@ document.addEventListener('DOMContentLoaded', function() {
   }, { threshold: 0.1 });
   reveals.forEach(el => io.observe(el));
   
+  // Load API client
+  const API_URL = 'http://localhost:3000';
+  let authToken = localStorage.getItem('immo_token');
+  let currentUser = JSON.parse(localStorage.getItem('immo_user') || 'null');
+  
+  // Update UI based on auth state
+  function updateAuthUI() {
+    const loginLink = document.getElementById('loginLink');
+    const userDisplay = document.getElementById('userDisplay');
+    if (authToken && currentUser) {
+      if (loginLink) loginLink.style.display = 'none';
+      if (userDisplay) {
+        userDisplay.style.display = 'flex';
+        userDisplay.querySelector('.user-name').textContent = currentUser.full_name || currentUser.username;
+      }
+    }
+  }
+  updateAuthUI();
+  
+  // Load properties from API
+  async function loadProperties() {
+    try {
+      const response = await fetch(`${API_URL}/api/properties`);
+      const data = await response.json();
+      return data.properties || [];
+    } catch (e) {
+      console.log('API non disponible, utilisation des propriétés statiques');
+      return [];
+    }
+  }
+  
+  // Render property card
+  function renderPropertyCard(property) {
+    const typeBadge = property.transaction_type === 'vente' ? 'Vente' : 'Location';
+    const priceFormatted = new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'XOF',
+      maximumFractionDigits: 0
+    }).format(property.price);
+    
+    return `
+      <div class="property-card reveal">
+        <div class="property-image">
+          <span class="property-badge ${property.transaction_type}">${typeBadge}</span>
+        </div>
+        <div class="property-body">
+          <h3 class="property-title">${property.title}</h3>
+          <p class="property-location">📍 ${property.address}, ${property.city}</p>
+          <div class="property-features">
+            <span>${property.bedrooms || 0} ch.</span>
+            <span>${property.bathrooms || 0} sdb</span>
+            <span>${property.surface} m²</span>
+          </div>
+          <div class="property-price">${priceFormatted}${property.transaction_type === 'location' ? '/mois' : ''}</div>
+          <div class="property-footer">
+            <div class="property-company">
+              <span class="company-icon" style="background: #00d4ff;"></span>
+              E-Immo
+            </div>
+            <a href="/property/detail.html?id=${property.id}" class="btn btn-sm btn-primary">Voir</a>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Load properties on page load
+  async function initProperties() {
+    const grid = document.querySelector('.listings-grid');
+    if (!grid) return;
+    
+    // Show loading state
+    grid.innerHTML = '<div class="loading">Chargement des propriétés...</div>';
+    
+    const properties = await loadProperties();
+    
+    if (properties.length > 0) {
+      grid.innerHTML = properties.slice(0, 6).map(renderPropertyCard).join('');
+    }
+  }
+  
+  // Try to load properties, fallback to static if API unavailable
+  setTimeout(() => {
+    initProperties();
+  }, 1000);
+  
   // Register form
-  document.getElementById('registerForm').addEventListener('submit', function(e) {
+  document.getElementById('registerForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    const form = e.target;
+    const username = form.querySelector('input[type="text"]').value;
+    const email = form.querySelector('input[type="email"]').value;
+    const password = form.querySelector('input[type="password"]').value;
+    
     showLoading('Inscription...');
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, full_name: username })
+      });
+      const data = await response.json();
+      
       hideLoading();
-      alert('✅ Inscription réussie! Bienvenue sur E-Immo Platform.');
-      closeModal('registerModal');
-    }, 1500);
+      
+      if (response.ok) {
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('immo_token', data.token);
+        localStorage.setItem('immo_user', JSON.stringify(data.user));
+        alert('✅ Inscription réussie! Bienvenue ' + username);
+        closeModal('registerModal');
+        updateAuthUI();
+      } else {
+        alert('❌ ' + (data.error || 'Erreur lors de l\'inscription'));
+      }
+    } catch (err) {
+      hideLoading();
+      alert('❌ Service temporairement indisponible');
+    }
   });
   
   // Login form
-  document.getElementById('loginForm').addEventListener('submit', function(e) {
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    const form = e.target;
+    const username = form.querySelector('input[type="text"]').value;
+    const password = form.querySelector('input[type="password"]').value;
+    
     showLoading('Connexion...');
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await response.json();
+      
       hideLoading();
-      alert('✅ Connexion réussie! Redirection vers le dashboard...');
-      closeModal('loginModal');
-    }, 1000);
+      
+      if (response.ok) {
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('immo_token', data.token);
+        localStorage.setItem('immo_user', JSON.stringify(data.user));
+        alert('✅ Connexion réussie! Bienvenue ' + data.user.full_name);
+        closeModal('loginModal');
+        updateAuthUI();
+        
+        // Redirect based on role
+        if (data.user.role === 'admin') {
+          window.location.href = '/immostack.html';
+        } else if (data.user.role === 'agent') {
+          window.location.href = '/dashboard.html';
+        }
+      } else {
+        alert('❌ ' + (data.error || 'Identifiants invalides'));
+      }
+    } catch (err) {
+      hideLoading();
+      alert('❌ Service temporairement indisponible');
+    }
   });
   
   // Smooth scroll

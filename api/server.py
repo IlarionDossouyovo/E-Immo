@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """
 E-Immo Platform - API Server
-Backend with Ollama AI Integration
+Backend with Ollama AI Integration + JWT Auth
 """
 
 import json
 import sqlite3
 import os
-from datetime import datetime
+import hashlib
+import secrets
+import base64
+import hmac
+from datetime import datetime, timedelta
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import urllib.request
@@ -16,6 +20,45 @@ import urllib.request
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'immo.db')
 OLLAMA_URL = "http://localhost:11434"
 MODEL_NAME = "llama3.2"
+JWT_SECRET = secrets.token_hex(32)
+JWT_EXPIRY_HOURS = 24
+
+# Simple JWT implementation
+def create_jwt(payload):
+    """Create a simple JWT token"""
+    header = {"alg": "HS256", "typ": "JWT"}
+    header_b64 = base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip('=')
+    payload["exp"] = (datetime.now() + timedelta(hours=JWT_EXPIRY_HOURS)).isoformat()
+    payload_b64 = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip('=')
+    
+    signature = hmac.new(JWT_SECRET.encode(), f"{header_b64}.{payload_b64}".encode(), hashlib.sha256).digest()
+    signature_b64 = base64.urlsafe_b64encode(signature).decode().rstrip('=')
+    
+    return f"{header_b64}.{payload_b64}.{signature_b64}"
+
+def verify_jwt(token):
+    """Verify a JWT token"""
+    try:
+        parts = token.split('.')
+        if len(parts) != 3:
+            return None
+        
+        header_b64, payload_b64, signature_b64 = parts
+        expected_signature = hmac.new(JWT_SECRET.encode(), f"{header_b64}.{payload_b64}".encode(), hashlib.sha256).digest()
+        expected_signature_b64 = base64.urlsafe_b64encode(expected_signature).decode().rstrip('=')
+        
+        if not hmac.compare_digest(signature_b64, expected_signature_b64):
+            return None
+        
+        payload = json.loads(base64.urlsafe_b64decode(payload_b64 + '==').decode())
+        
+        exp = datetime.fromisoformat(payload.get("exp", "2000-01-01"))
+        if exp < datetime.now():
+            return None
+        
+        return payload
+    except Exception:
+        return None
 
 class ImmoAPIHandler(BaseHTTPRequestHandler):
     
@@ -84,7 +127,13 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
         path = parsed.path
         data = self._get_json()
         
-        if path == '/api/ai/chat':
+        if path == '/api/auth/login':
+            self._auth_login(data)
+        elif path == '/api/auth/register':
+            self._auth_register(data)
+        elif path == '/api/auth/logout':
+            self._auth_logout()
+        elif path == '/api/ai/chat':
             self._ai_chat_post(data)
         elif path == '/api/ai/analyze':
             self._ai_analyze_post(data)
@@ -102,6 +151,109 @@ class ImmoAPIHandler(BaseHTTPRequestHandler):
             self._run_automation(data)
         else:
             self._send_json({'error': 'Not found'}, 404)
+    
+    # ==================== AUTH ====================
+    
+    def _auth_login(self, data):
+        """Login user"""
+        username = data.get('username', '')
+        password = data.get('password', '')
+        
+        if not username or not password:
+            self._send_json({'error': 'Username et mot de passe requis'}, 400)
+            return
+        
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        # Hash password
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        
+        cursor.execute("""
+            SELECT id, username, email, role, full_name 
+            FROM users 
+            WHERE username = ? AND password_hash = ?
+        """, (username, password_hash))
+        
+        user = cursor.fetchone()
+        conn.close()
+        
+        if not user:
+            self._send_json({'error': 'Identifiants invalides'}, 401)
+            return
+        
+        # Create JWT
+        token = create_jwt({
+            'user_id': user['id'],
+            'username': user['username'],
+            'role': user['role']
+        })
+        
+        self._send_json({
+            'token': token,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email'],
+                'role': user['role'],
+                'full_name': user['full_name']
+            }
+        })
+    
+    def _auth_register(self, data):
+        """Register new user"""
+        username = data.get('username', '')
+        email = data.get('email', '')
+        password = data.get('password', '')
+        full_name = data.get('full_name', '')
+        
+        if not username or not email or not password:
+            self._send_json({'error': 'Tous les champs sont requis'}, 400)
+            return
+        
+        conn = self._init_db()
+        cursor = conn.cursor()
+        
+        # Check if user exists
+        cursor.execute("SELECT id FROM users WHERE username = ? OR email = ?", (username, email))
+        if cursor.fetchone():
+            conn.close()
+            self._send_json({'error': 'Utilisateur déjà existant'}, 400)
+            return
+        
+        # Hash password
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        
+        cursor.execute("""
+            INSERT INTO users (username, email, password_hash, role, full_name)
+            VALUES (?, ?, ?, 'client', ?)
+        """, (username, email, password_hash, full_name))
+        
+        user_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        # Create JWT
+        token = create_jwt({
+            'user_id': user_id,
+            'username': username,
+            'role': 'client'
+        })
+        
+        self._send_json({
+            'token': token,
+            'user': {
+                'id': user_id,
+                'username': username,
+                'email': email,
+                'role': 'client'
+            }
+        }, 201)
+    
+    def _auth_logout(self):
+        """Logout user"""
+        # JWT tokens are stateless - client just discards the token
+        self._send_json({'message': 'Déconnexion réussie'})
     
     def _call_ollama(self, prompt, system_prompt=None):
         """Call Ollama API"""
