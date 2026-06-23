@@ -497,11 +497,64 @@ Donne un prix estimé en XOF (Francs CFA)."""
         self._send_json({'estimate': estimate, 'input': data})
     
     def _get_properties(self, query):
-        """Get properties"""
+        """Get properties with filters"""
         conn = self._init_db()
         cursor = conn.cursor()
         
-        cursor.execute("SELECT * FROM properties ORDER BY created_at DESC LIMIT 20")
+        # Build query with filters
+        sql = "SELECT * FROM properties WHERE 1=1"
+        params = []
+        
+        # Filter by type
+        if query.get('type'):
+            types = query.get('type')
+            if isinstance(types, list):
+                placeholders = ','.join(['?' for _ in types])
+                sql += f" AND type IN ({placeholders})"
+                params.extend(types)
+            else:
+                sql += " AND type = ?"
+                params.append(types)
+        
+        # Filter by transaction_type
+        if query.get('transaction_type'):
+            sql += " AND transaction_type = ?"
+            params.append(query.get('transaction_type')[0])
+        
+        # Filter by city
+        if query.get('city'):
+            sql += " AND city = ?"
+            params.append(query.get('city')[0])
+        
+        # Filter by min price
+        if query.get('min_price'):
+            sql += " AND price >= ?"
+            params.append(int(query.get('min_price')[0]))
+        
+        # Filter by max price
+        if query.get('max_price'):
+            sql += " AND price <= ?"
+            params.append(int(query.get('max_price')[0]))
+        
+        # Filter by bedrooms
+        if query.get('bedrooms'):
+            sql += " AND bedrooms >= ?"
+            params.append(int(query.get('bedrooms')[0]))
+        
+        # Filter by status
+        if query.get('status'):
+            sql += " AND status = ?"
+            params.append(query.get('status')[0])
+        
+        # Order and limit
+        order_by = query.get('order_by', ['created_at'])[0]
+        order_dir = query.get('order_dir', ['DESC'])[0]
+        sql += f" ORDER BY {order_by} {order_dir}"
+        
+        limit = int(query.get('limit', [20])[0])
+        sql += f" LIMIT {limit}"
+        
+        cursor.execute(sql, params)
         properties = [dict(row) for row in cursor.fetchall()]
         conn.close()
         
